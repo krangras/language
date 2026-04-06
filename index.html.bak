@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English Lab — B1+ → C1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            navy: { 950: '#0a0f1a', 900: '#0f172a', 800: '#1e293b' },
+            accent: { cyan: '#38bdf8', red: '#ef4444' }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    :root {
+      --bg-deep: #0a0f1a;
+      --glass: rgba(30, 41, 59, 0.45);
+      --border-glass: rgba(56, 189, 248, 0.15);
+      --cyan: #38bdf8;
+      --red: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: linear-gradient(145deg, #0a0f1a 0%, #0f172a 40%, #111827 100%);
+      min-height: 100vh;
+      color: #e2e8f0;
+    }
+    /* Кастомный скролл */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.8); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, var(--cyan), rgba(239, 68, 68, 0.7));
+      border-radius: 4px;
+    }
+    * { scrollbar-width: thin; scrollbar-color: #38bdf8 #0f172a; }
+
+    .glass-panel {
+      background: var(--glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glass);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.4);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(56, 189, 248, 0.12);
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .glass-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(56, 189, 248, 0.35);
+      box-shadow: 0 12px 40px rgba(56, 189, 248, 0.08);
+    }
+    .neon-cyan { color: var(--cyan); text-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }
+    .neon-red { color: var(--red); text-shadow: 0 0 20px rgba(239, 68, 68, 0.35); }
+    .btn-primary {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(56, 189, 248, 0.1));
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      transition: all 0.2s ease;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.4), rgba(56, 189, 248, 0.2));
+      box-shadow: 0 0 24px rgba(56, 189, 248, 0.25);
+    }
+    .btn-accent-red {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.08));
+      border: 1px solid rgba(239, 68, 68, 0.45);
+    }
+    .btn-accent-red:hover {
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.25);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in { animation: fadeIn 0.45s ease forwards; }
+    @keyframes xpPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.5); }
+      50% { transform: scale(1.03); box-shadow: 0 0 24px 4px rgba(56, 189, 248, 0.35); }
+    }
+    .xp-pulse { animation: xpPulse 0.6s ease; }
+    @keyframes floatBg {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.7; }
+    }
+    .bg-orb { animation: floatBg 8s ease-in-out infinite; }
+
+    /* Вкладки */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeIn 0.35s ease; }
+
+    /* Навигация */
+    .nav-item.active {
+      color: var(--cyan);
+      background: rgba(56, 189, 248, 0.12);
+      border-color: rgba(56, 189, 248, 0.35);
+    }
+    .bottom-nav-item.active {
+      color: var(--cyan);
+    }
+    .bottom-nav-item.active .nav-icon { filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.6)); }
+
+    /* Грамматика: подсветка */
+    .hl-tense { background: rgba(56, 189, 248, 0.25); border-bottom: 2px solid #38bdf8; padding: 0 2px; border-radius: 2px; }
+    .hl-phrasal { background: rgba(239, 68, 68, 0.22); border-bottom: 2px solid #ef4444; padding: 0 2px; border-radius: 2px; }
+
+    /* Караоке: активная строка */
+    .karaoke-line { transition: all 0.25s ease; }
+    .karaoke-line.active {
+      color: #38bdf8;
+      font-weight: 600;
+      text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+    }
+    .karaoke-word { cursor: pointer; border-radius: 2px; }
+    .karaoke-word:hover { background: rgba(56, 189, 248, 0.2); }
+
+    /* Кино: субтитры */
+    .cinema-shell {
+      position: relative;
+      border-radius: 1rem;
+      overflow: hidden;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3), 0 24px 48px rgba(0, 0, 0, 0.45);
+      background: #020617;
+    }
+    .cinema-sub-bar {
+      background: linear-gradient(180deg, transparent 0%, rgba(2, 6, 23, 0.92) 35%, rgba(15, 23, 42, 0.98) 100%);
+      border-top: 1px solid rgba(56, 189, 248, 0.12);
+    }
+    .sub-word {
+      display: inline;
+      padding: 0.12em 0.2em;
+      margin: 0 0.02em;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .sub-word:hover {
+      background: rgba(56, 189, 248, 0.22);
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.15);
+    }
+    .sub-word:active { background: rgba(239, 68, 68, 0.2); }
+    .sub-word--picked {
+      background: rgba(56, 189, 248, 0.28) !important;
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.45);
+    }
+    #cinemaSubLine { line-height: 1.65; }
+
+    input, textarea, select {
+      background: rgba(15, 23, 42, 0.65) !important;
+      border-color: rgba(56, 189, 248, 0.2) !important;
+      color: #e2e8f0 !important;
+    }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: rgba(56, 189, 248, 0.5) !important;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.15);
+    }
+  </style>
+</head>
+<body class="antialiased pb-28 md:pb-8">
+  <!-- Декоративные орбы -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+    <div class="absolute top-[-10%] right-[-5%] w-[420px] h-[420px] rounded-full bg-cyan-500/10 blur-[100px] bg-orb"></div>
+    <div class="absolute bottom-[10%] left-[-10%] w-[380px] h-[380px] rounded-full bg-red-500/8 blur-[90px] bg-orb" style="animation-delay: -4s;"></div>
+  </div>
+
+  <div class="flex min-h-screen">
+    <!-- Десктоп: боковое меню -->
+    <aside class="hidden md:flex flex-col w-56 shrink-0 glass-panel border-r border-cyan-500/10 p-4 gap-2 fixed left-0 top-0 bottom-0 z-40">
+      <div class="mb-4 px-2">
+        <h1 class="text-lg font-bold tracking-tight neon-cyan">English Lab</h1>
+        <p class="text-xs text-slate-500 mt-1">B1+ → C1 · Your passions</p>
+      </div>
+      <nav id="desktopNav" class="flex flex-col gap-1"></nav>
+      <div class="mt-auto pt-4 border-t border-white/5">
+        <label class="text-xs text-slate-500 block mb-1">Имя</label>
+        <input type="text" id="usernameInput" maxlength="32" class="w-full rounded-lg px-3 py-2 text-sm border" placeholder="Ваше имя" />
+      </div>
+    </aside>
+
+    <main class="flex-1 md:ml-56 px-4 py-6 md:py-10 max-w-5xl mx-auto w-full">
+      <header class="mb-8 animate-in">
+        <p class="text-sm text-slate-400" id="greeting">Привет!</p>
+        <h2 class="text-2xl md:text-3xl font-semibold text-white mt-1" id="headline">Добро пожаловать в English Lab</h2>
+        <div class="md:hidden mt-4 glass-card rounded-xl p-3 border border-white/5">
+          <label class="text-xs text-slate-500 block mb-1">Твоё имя</label>
+          <input type="text" id="usernameInputMobile" maxlength="32" class="w-full rounded-lg px-3 py-2 text-sm border" placeholder="Как к тебе обращаться" />
+        </div>
+      </header>
+
+      <!-- Панели вкладок -->
+      <section id="panel-dashboard" class="tab-panel active space-y-6">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+          <div class="glass-card rounded-2xl p-4 md:p-5" id="cardXp">
+            <p class="text-xs uppercase tracking-wider text-slate-500">XP</p>
+            <p class="text-2xl md:text-3xl font-bold neon-cyan mt-1" id="statXp">0</p>
+          </div>
+          <div class="glass-card rounded-2xl p-4 md:p-5">
+            <p class="text-xs uppercase tracking-wider text-slate-500">Уровень</p>
+            <p class="text-2xl md:text-3xl font-bold text-white mt-1" id="statLevel">B1+</p>
+          </div>
+          <div class="glass-card rounded-2xl p-4 md:p-5">
+            <p class="text-xs uppercase tracking-wider text-slate-500">Словарь</p>
+            <p class="text-2xl md:text-3xl font-bold mt-1 neon-red" id="statVocab">0</p>
+          </div>
+          <div class="glass-card rounded-2xl p-4 md:p-5">
+            <p class="text-xs uppercase tracking-wider text-slate-500">Стрик</p>
+            <p class="text-2xl md:text-3xl font-bold text-amber-400 mt-1" id="statStreak">0</p>
+            <p class="text-xs text-slate-500 mt-1">дней подряд</p>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 md:p-6">
+          <h3 class="text-lg font-semibold text-white mb-2">Прогресс до следующего уровня</h3>
+          <div class="h-3 rounded-full bg-slate-800 overflow-hidden border border-white/5">
+            <div id="levelProgressBar" class="h-full rounded-full transition-all duration-500 ease-out" style="width: 0%; background: linear-gradient(90deg, #38bdf8, #22d3ee, #ef4444);"></div>
+          </div>
+          <p class="text-sm text-slate-400 mt-2" id="levelProgressText">—</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 md:p-6">
+          <h3 class="text-lg font-semibold text-white mb-3">Ежедневный челлендж</h3>
+          <p class="text-sm text-slate-400 mb-3">Напиши 2–3 предложения на английском о своём дне или о гонках / музыке.</p>
+          <textarea id="dailyChallenge" rows="4" class="w-full rounded-xl px-4 py-3 text-sm border resize-y min-h-[100px]" placeholder="Today I..."></textarea>
+          <div class="flex flex-wrap gap-3 mt-4">
+            <button type="button" id="btnDailyChallenge" class="btn-primary rounded-xl px-5 py-2.5 text-sm font-medium text-cyan-200">Отправить (+15 XP)</button>
+            <span id="dailyChallengeStatus" class="text-sm text-slate-500 self-center"></span>
+          </div>
+        </div>
+      </section>
+
+      <section id="panel-f1" class="tab-panel space-y-4">
+        <div class="glass-card rounded-2xl p-5 md:p-6">
+          <h3 class="text-lg font-semibold text-white mb-2">🏎️ Formula 1</h3>
+          <p class="text-sm text-slate-400 mb-4">Вставь статью или заметки про F1 — сохрани, выдели слова в словарь, прослушай британским акцентом.</p>
+          <textarea id="f1Input" rows="8" class="w-full rounded-xl px-4 py-3 text-sm border" placeholder="Paste an F1 article..."></textarea>
+          <div class="flex flex-wrap gap-2 mt-4">
+            <button type="button" id="btnF1Save" class="btn-primary rounded-xl px-4 py-2 text-sm font-medium text-cyan-200">Сохранить текст</button>
+            <button type="button" id="btnF1Words" class="btn-primary rounded-xl px-4 py-2 text-sm font-medium text-cyan-200">Выделить слова в словарь</button>
+            <button type="button" id="btnF1Speak" class="btn-accent-red rounded-xl px-4 py-2 text-sm font-medium text-red-200">🔊 Озвучить текст</button>
+          </div>
+        </div>
+        <div id="f1PreviewWrap" class="glass-card rounded-2xl p-5 md:p-6 hidden">
+          <h4 class="text-sm font-medium text-slate-300 mb-2">Сохранённый текст</h4>
+          <div id="f1Preview" class="text-sm text-slate-200 whitespace-pre-wrap leading-relaxed"></div>
+        </div>
+      </section>
+
+      <section id="panel-bond" class="tab-panel space-y-4">
+        <div class="glass-card rounded-2xl p-5 md:p-6">
+          <h3 class="text-lg font-semibold text-white mb-2">🎬 James Bond</h3>
+          <p class="text-sm text-slate-400 mb-4">Статьи, обзоры или диалоги из фильмов — те же инструменты.</p>
+          <textarea id="bondInput" rows="8" class="w-full rounded-xl px-4 py-3 text-sm border" placeholder="Dialogue or article..."></textarea>
+          <div class="flex flex-wrap gap-2 mt-4">
+            <button type="button" id="btnBondSave" class="btn-primary rounded-xl px-4 py-2 text-sm font-medium text-cyan-200">Сохранить текст</button>
+            <button type="button" id="btnBondWords" class="btn-primary rounded-xl px-4 py-2 text-sm font-medium text-cyan-200">Выделить слова в словарь</button>
+            <button type="button" id="btnBondSpeak" class="btn-accent-red rounded-xl px-4 py-2 text-sm font-medium text-red-200">🔊 Озвучить текст</button>
+          </div>
+        </div>
+        <div id="bondPreviewWrap" class="glass-card rounded-2xl p-5 md:p-6 hidden">
+          <h4 class="text-sm font-medium text-slate-300 mb-2">Сохранённый текст</h4>
+          <div id="bondPreview" class="text-sm text-slate-200 whitespace-pre-wrap leading-relaxed"></div>
+        </div>
+      </section>
+
+      <section id="panel-music" class="tab-panel space-y-4">
+        <div class="flex gap-2 p-1 rounded-xl bg-slate-900/50 border border-white/5 w-fit">
+          <button type="button" id="tabMusicAnn" class="music-subtab px-4 py-2 rounded-lg text-sm font-medium transition active">Annisokay</button>
+          <button type="button" id="tabMusicNeck" class="music-subtab px-4 py-2 rounded-lg text-sm font-medium transition">Neck Deep</button>
+        </div>
+
+        <div id="musicAnnPanel" class="space-y-4">
+          <div class="glass-card rounded-2xl p-5 md:p-6">
+            <h3 class="text-lg font-semibold text-white mb-2">🎸 Annisokay — текст песни</h3>
+            <textarea id="annInput" rows="10" class="w-full rounded-xl px-4 py-3 text-sm border font-mono" placeholder="Lyrics..."></textarea>
+            <div class="flex flex-wrap gap-2 mt-4">
+              <button type="button" id="btnAnnSave" class="btn-primary rounded-xl px-4 py-2 text-sm">Сохранить</button>
+              <button type="button" id="btnAnnWords" class="btn-primary rounded-xl px-4 py-2 text-sm">Слова в словарь</button>
+              <button type="button" id="btnAnnSpeak" class="btn-accent-red rounded-xl px-4 py-2 text-sm">🔊 Озвучить</button>
+              <button type="button" id="btnAnnGrammar" class="btn-primary rounded-xl px-4 py-2 text-sm border border-cyan-500/30">Разобрать грамматику</button>
+            </div>
+          </div>
+          <div class="glass-card rounded-2xl p-5 md:p-6">
+            <h4 class="text-sm font-medium text-slate-300 mb-2">Разбор (времена · фразовые глаголы)</h4>
+            <div id="annGrammarOut" class="text-sm text-slate-200 leading-relaxed min-h-[80px] rounded-xl p-4 bg-slate-900/40 border border-white/5"></div>
+          </div>
+          <div class="glass-card rounded-2xl p-5 md:p-6">
+            <h4 class="text-sm font-medium text-white mb-2">Мини-упражнение по тексту</h4>
+            <p class="text-xs text-slate-500 mb-2">Вставь пропущенное слово из твоего сохранённого текста (первое длинное слово).</p>
+            <p id="annExerciseQ" class="text-slate-200 mb-3">Сохрани текст выше, затем нажми «Обновить упражнение».</p>
+            <input type="text" id="annExerciseA" class="w-full rounded-xl px-4 py-2 text-sm border mb-2" placeholder="Your answer" />
+            <button type="button" id="btnAnnExercise" class="btn-primary rounded-xl px-4 py-2 text-sm">Проверить (+5 XP за верный ответ)</button>
+            <button type="button" id="btnAnnExerciseRefresh" class="ml-2 text-sm text-cyan-400 underline">Обновить упражнение</button>
+            <p id="annExerciseFeedback" class="text-sm mt-2"></p>
+          </div>
+        </div>
+
+        <div id="musicNeckPanel" class="space-y-4 hidden">
+          <div class="glass-card rounded-2xl p-5 md:p-6">
+            <h3 class="text-lg font-semibold text-white mb-2">🎸 Neck Deep — текст песни</h3>
+            <textarea id="neckInput" rows="10" class="w-full rounded-xl px-4 py-3 text-sm border font-mono" placeholder="Lyrics..."></textarea>
+            <div class="flex flex-wrap gap-2 mt-4">
+              <button type="button" id="btnNeckSave" class="btn-primary rounded-xl px-4 py-2 text-sm">Сохранить</button>
+              <button type="button" id="btnNeckWords" class="btn-primary rounded-xl px-4 py-2 text-sm">Слова в словарь</button>
+              <button type="button" id="btnNeckSpeak" class="btn-accent-red rounded-xl px-4 py-2 text-sm">🔊 Озвучить</button>
+              <button type="button" id="btnNeckGrammar" class="btn-primary rounded-xl px-4 py-2 text-sm border border-cyan-500/30">Разобрать грамматику</button>
+            </div>
+          </div>
+          <div class="glass-card rounded-2xl p-5 md:p-6">
+            <h4 class="text-sm font-medium text-slate-300 mb-2">Разбор</h4>
+            <div id="neckGrammarOut" class="text-sm text-slate-200 leading-relaxed min-h-[80px] rounded-xl p-4 bg-slate-900/40 border border-white/5"></div>
+          </div>
+          <div class="glass-card rounded-2xl p-5 md:p-6">
+            <h4 class="text-sm font-medium text-white mb-2">Мини-упражнение</h4>
+            <p id="neckExerciseQ" class="text-slate-200 mb-3">—</p>
+            <input type="text" id="neckExerciseA" class="w-full rounded-xl px-4 py-2 text-sm border mb-2" placeholder="Your answer" />
+            <button type="button" id="btnNeckExercise" class="btn-primary rounded-xl px-4 py-2 text-sm">Проверить (+5 XP)</button>
+            <button type="button" id="btnNeckExerciseRefresh" class="ml-2 text-sm text-cyan-400 underline">Обновить</button>
+            <p id="neckExerciseFeedback" class="text-sm mt-2"></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="panel-karaoke" class="tab-panel space-y-4">
+        <div class="glass-card rounded-2xl p-5 md:p-6">
+          <h3 class="text-lg font-semibold text-white mb-2">🎤 Караоке с синхронизацией</h3>
+          <p class="text-xs text-slate-500 mb-4">MP3 хранится только в сессии браузера — после перезагрузки выбери файл снова. Текст и тайминги сохраняются в localStorage. Поддерживается LRC: <code class="text-cyan-400/90">[mm:ss.xx]</code> или весь JSON с полем <code class="text-cyan-400/90">syncedLyrics</code>.</p>
+          <input type="file" id="karaokeFile" accept="audio/mpeg,audio/mp3" class="text-sm mb-4 w-full" />
+          <label class="text-xs text-slate-500 block mb-1">Импорт LRC / JSON (syncedLyrics)</label>
+          <textarea id="karaokeLrcPaste" rows="5" class="w-full rounded-xl px-4 py-3 text-sm border font-mono mb-2" placeholder='[00:28.38] At the heart of the ocean&#10;… или вставь целиком JSON из каталога треков'></textarea>
+          <div class="flex flex-wrap gap-2 mb-4">
+            <button type="button" id="btnKaraokeImportLrc" class="btn-primary rounded-xl px-4 py-2 text-sm font-medium text-cyan-200">Разобрать LRC → строки и секунды</button>
+          </div>
+          <label class="text-xs text-slate-500 block mb-1">Текст построчно</label>
+          <textarea id="karaokeLyrics" rows="8" class="w-full rounded-xl px-4 py-3 text-sm border font-mono mb-3" placeholder="Line one&#10;Line two"></textarea>
+          <label class="text-xs text-slate-500 block mb-1">Тайминги (секунды через запятую, по одному на строку)</label>
+          <textarea id="karaokeTimings" rows="4" class="w-full rounded-xl px-4 py-3 text-sm border font-mono mb-4" placeholder="0, 5.2, 9.7"></textarea>
+          <audio id="karaokeAudio" controls class="w-full rounded-lg mb-4"></audio>
+          <div class="flex flex-wrap gap-2 mb-4">
+            <button type="button" id="btnKaraokeSave" class="btn-primary rounded-xl px-4 py-2 text-sm">Сохранить текст и тайминги</button>
+            <button type="button" id="btnKaraokePrev" class="btn-primary rounded-xl px-4 py-2 text-sm">Предыдущая строка</button>
+            <button type="button" id="btnKaraokeNext" class="btn-primary rounded-xl px-4 py-2 text-sm">Следующая строка</button>
+            <button type="button" id="btnKaraokeReset" class="btn-accent-red rounded-xl px-4 py-2 text-sm">Сбросить</button>
+          </div>
+          <div id="karaokeDisplay" class="rounded-xl p-6 bg-slate-900/50 border border-white/5 min-h-[120px] text-lg leading-relaxed"></div>
+        </div>
+      </section>
+
+      <section id="panel-vocab" class="tab-panel space-y-4">
+        <div class="glass-card rounded-2xl p-5 md:p-6">
+          <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
+            <h3 class="text-lg font-semibold text-white">📚 Словарь</h3>
+            <span class="text-sm text-slate-400">Всего слов: <strong class="text-cyan-400" id="vocabCountHeader">0</strong></span>
+            <button type="button" id="btnExportVocab" class="btn-primary rounded-xl px-4 py-2 text-sm">Экспорт JSON</button>
+          </div>
+          <div id="vocabList" class="flex flex-wrap gap-2 max-h-[420px] overflow-y-auto pr-1"></div>
+          <p id="vocabEmpty" class="text-slate-500 text-sm">Слов пока нет — добавь из текстов или караоке.</p>
+        </div>
+      </section>
+
+      <section id="panel-grammar" class="tab-panel space-y-4">
+        <div class="glass-card rounded-2xl p-5 md:p-6">
+          <h3 class="text-lg font-semibold text-white mb-2">🧠 Грамматический тьютор</h3>
+          <p class="text-sm text-slate-400 mb-3">Введи предложение на английском. Проверка по простым правилам (без облака).</p>
+          <textarea id="grammarInput" rows="4" class="w-full rounded-xl px-4 py-3 text-sm border" placeholder="Yesterday I go to the cinema."></textarea>
+          <button type="button" id="btnGrammarCheck" class="btn-primary rounded-xl px-5 py-2.5 text-sm font-medium mt-4 text-cyan-200">Проверить (+8 XP)</button>
+          <div id="grammarResult" class="mt-6 p-4 rounded-xl bg-slate-900/50 border border-white/5 hidden">
+            <p class="text-xs uppercase text-slate-500 mb-1">Исправлено</p>
+            <p id="grammarFixed" class="text-cyan-200 font-medium"></p>
+            <p class="text-xs uppercase text-slate-500 mt-4 mb-1">Объяснение</p>
+            <p id="grammarExplain" class="text-slate-300 text-sm leading-relaxed"></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="panel-cinema" class="tab-panel space-y-4">
+        <div class="grid lg:grid-cols-5 gap-4 lg:gap-6">
+          <div class="lg:col-span-3 space-y-4">
+            <div class="glass-card rounded-2xl p-4 md:p-5 border border-cyan-500/10">
+              <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+                <h3 class="text-lg font-semibold text-white tracking-tight">📽 Фильм + субтитры</h3>
+                <span class="text-[11px] uppercase tracking-wider text-slate-500">Локальные файлы · без загрузки на сервер</span>
+              </div>
+              <p class="text-xs text-slate-500 mb-4 leading-relaxed">Выбери видео и файл субтитров (SRT или VTT) с диска. Клик по слову — в словарь (+5 XP за новое). Справа — разбор строки или AI (если настроен ключ).</p>
+              <div class="flex flex-col sm:flex-row gap-3 mb-4">
+                <label class="flex-1 cursor-pointer">
+                  <span class="text-xs text-slate-500 block mb-1">Видео</span>
+                  <input type="file" id="cinemaVideoFile" accept="video/*" class="text-sm w-full file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/15 file:px-3 file:py-1.5 file:text-cyan-200" />
+                </label>
+                <label class="flex-1 cursor-pointer">
+                  <span class="text-xs text-slate-500 block mb-1">Субтитры</span>
+                  <input type="file" id="cinemaSubFile" accept=".srt,.vtt,text/plain" class="text-sm w-full file:mr-3 file:rounded-lg file:border-0 file:bg-red-500/10 file:px-3 file:py-1.5 file:text-red-200" />
+                </label>
+              </div>
+              <p id="cinemaFileHint" class="text-xs text-slate-600 mb-3 min-h-[1.25rem]"></p>
+              <div class="cinema-shell aspect-video">
+                <video id="cinemaVideo" class="w-full h-full object-contain bg-black" controls playsinline crossorigin="anonymous"></video>
+              </div>
+              <div class="cinema-sub-bar mt-0 px-4 py-5 md:py-6 min-h-[5.5rem] md:min-h-[6rem] flex items-end">
+                <p id="cinemaSubLine" class="text-base md:text-lg text-center w-full text-slate-100 font-medium px-1 select-none">Загрузи субтитры — текст появится здесь синхронно с таймкодом.</p>
+              </div>
+            </div>
+          </div>
+          <div class="lg:col-span-2 space-y-4">
+            <div class="glass-card rounded-2xl p-4 md:p-5 border border-white/5 sticky top-4">
+              <p class="text-[10px] uppercase tracking-widest text-slate-500 mb-2">Текущая реплика</p>
+              <p id="cinemaLinePlain" class="text-sm text-slate-300 leading-relaxed mb-4 min-h-[2.5rem] border-l-2 border-cyan-500/40 pl-3">—</p>
+              <div class="flex flex-wrap gap-2 mb-4">
+                <span class="text-xs text-slate-500 self-center">Выбрано:</span>
+                <span id="cinemaPickedWord" class="px-3 py-1 rounded-full bg-slate-800/90 border border-cyan-500/25 text-cyan-200 text-sm font-medium">—</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 mb-3">
+                <button type="button" id="btnCinemaAddWord" class="btn-primary rounded-xl px-3 py-2 text-xs font-medium text-cyan-100">В словарь</button>
+                <button type="button" id="btnCinemaSpeakWord" class="btn-accent-red rounded-xl px-3 py-2 text-xs font-medium text-red-100">🔊 Слово</button>
+                <button type="button" id="btnCinemaOfflineSentence" class="btn-primary rounded-xl px-3 py-2 text-xs font-medium text-cyan-100 col-span-2">Офлайн: предложение</button>
+                <button type="button" id="btnCinemaOfflineWord" class="btn-primary rounded-xl px-3 py-2 text-xs font-medium text-cyan-100 col-span-2">Офлайн: слово</button>
+                <button type="button" id="btnCinemaAiSentence" class="rounded-xl px-3 py-2 text-xs font-medium border border-violet-500/40 bg-violet-500/10 text-violet-200 hover:bg-violet-500/20 transition col-span-2">✨ AI: всё предложение</button>
+                <button type="button" id="btnCinemaAiWord" class="rounded-xl px-3 py-2 text-xs font-medium border border-violet-500/40 bg-violet-500/10 text-violet-200 hover:bg-violet-500/20 transition col-span-2">✨ AI: выбранное слово</button>
+              </div>
+              <details class="group border border-white/5 rounded-xl p-3 bg-slate-900/40 mb-3">
+                <summary class="text-xs text-slate-400 cursor-pointer list-none flex items-center justify-between">
+                  <span>Настройки AI (OpenAI-совместимо)</span>
+                  <span class="text-cyan-500/60 group-open:rotate-180 transition">▼</span>
+                </summary>
+                <p class="text-[11px] text-slate-600 mt-2 mb-3 leading-snug">Ключ хранится только в этом браузере. Прямой вызов OpenAI из страницы часто блокируется CORS — удобны локальный прокси или LM Studio / Ollama на localhost.</p>
+                <label class="text-xs text-slate-500 block mb-1">Base URL</label>
+                <input type="text" id="cinemaAiBase" class="w-full rounded-lg px-3 py-2 text-xs border mb-2" placeholder="https://api.openai.com/v1" />
+                <label class="text-xs text-slate-500 block mb-1">API key</label>
+                <input type="password" id="cinemaAiKey" class="w-full rounded-lg px-3 py-2 text-xs border mb-2" placeholder="sk-..." autocomplete="off" />
+                <label class="text-xs text-slate-500 block mb-1">Модель</label>
+                <input type="text" id="cinemaAiModel" class="w-full rounded-lg px-3 py-2 text-xs border mb-2" placeholder="gpt-4o-mini" />
+                <button type="button" id="btnCinemaAiSave" class="btn-primary rounded-lg px-3 py-1.5 text-xs w-full">Сохранить настройки</button>
+              </details>
+              <div id="cinemaAnalysisOut" class="rounded-xl p-4 bg-slate-950/60 border border-white/5 min-h-[120px] text-sm text-slate-300 leading-relaxed whitespace-pre-wrap"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Мобильная нижняя навигация -->
+  <nav id="mobileNav" class="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-panel border-t border-cyan-500/15 px-1 py-2 flex flex-nowrap justify-start gap-0.5 overflow-x-auto overflow-y-hidden safe-area-pb max-w-full"></nav>
+
+  <!-- Toast XP -->
+  <div id="xpToast" class="fixed top-4 right-4 z-[100] px-4 py-2 rounded-xl glass-card border border-cyan-400/40 text-cyan-200 text-sm font-medium opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+  <script>
+(function () {
+  'use strict';
+
+  const STORAGE_KEY = 'englishLabV1';
+
+  const defaultState = () => ({
+    username: '',
+    xp: 0,
+    vocabulary: [],
+    streak: { count: 0, lastDate: '' },
+    challengeDate: '',
+    challengeDone: false,
+    f1Text: '',
+    bondText: '',
+    annText: '',
+    neckText: '',
+    karaokeLyrics: '',
+    karaokeTimings: '',
+    annExerciseWord: '',
+    neckExerciseWord: '',
+    aiBaseUrl: 'https://api.openai.com/v1',
+    aiApiKey: '',
+    aiModel: 'gpt-4o-mini'
+  });
+
+  let state = defaultState();
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        state = { ...defaultState(), ...parsed };
+        if (!Array.isArray(state.vocabulary)) state.vocabulary = [];
+        if (!state.streak || typeof state.streak !== 'object') state.streak = { count: 0, lastDate: '' };
+        if (state.challengeDate !== todayStr()) state.challengeDone = false;
+      }
+    } catch (e) {
+      console.warn('loadState', e);
+      state = defaultState();
+    }
+    updateStreakOnVisit();
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      console.warn('saveState', e);
+    }
+  }
+
+  function todayStr() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function yesterdayStr() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function updateStreakOnVisit() {
+    const t = todayStr();
+    const last = state.streak.lastDate || '';
+    if (last === t) {
+      saveState();
+      return;
+    }
+    if (!last) {
+      state.streak.count = 1;
+    } else if (last === yesterdayStr()) {
+      state.streak.count = (state.streak.count || 0) + 1;
+    } else {
+      state.streak.count = 1;
+    }
+    state.streak.lastDate = t;
+    saveState();
+  }
+
+  function getLevel(xp) {
+    if (xp >= 4000) return { code: 'C1', name: 'C1', min: 4000, next: null };
+    if (xp >= 1500) return { code: 'B2', name: 'B2', min: 1500, next: 4000 };
+    return { code: 'B1+', name: 'B1+', min: 0, next: 1500 };
+  }
+
+  function levelProgress(xp) {
+    const L = getLevel(xp);
+    if (!L.next) return { pct: 100, text: 'Максимальный уровень в приложении — C1. Продолжай практику!' };
+    const span = L.next - L.min;
+    const cur = xp - L.min;
+    const pct = Math.min(100, Math.round((cur / span) * 100));
+    const need = L.next - xp;
+    return {
+      pct,
+      text: 'До ' + (L.code === 'B1+' ? 'B2' : 'C1') + ': ещё ' + need + ' XP (' + pct + '% текущего диапазона)'
+    };
+  }
+
+  let xpPulseTimer = null;
+  function addXp(amount, reason) {
+    state.xp = (state.xp || 0) + amount;
+    saveState();
+    refreshDashboard();
+    const card = document.getElementById('cardXp');
+    if (card) {
+      card.classList.remove('xp-pulse');
+      void card.offsetWidth;
+      card.classList.add('xp-pulse');
+    }
+    const toast = document.getElementById('xpToast');
+    if (toast) {
+      toast.textContent = '+' + amount + ' XP' + (reason ? ' · ' + reason : '');
+      toast.classList.remove('opacity-0');
+      toast.classList.add('opacity-100');
+      clearTimeout(xpPulseTimer);
+      xpPulseTimer = setTimeout(function () {
+        toast.classList.add('opacity-0');
+        toast.classList.remove('opacity-100');
+      }, 2200);
+    }
+  }
+
+  function speakBritish(text) {
+    if (!text || !text.trim()) return;
+    if (!('speechSynthesis' in window)) {
+      alert('Web Speech API не поддерживается в этом браузере.');
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text.trim());
+    u.lang = 'en-GB';
+    u.rate = 0.85;
+    window.speechSynthesis.speak(u);
+  }
+
+  function extractWords(text) {
+    const re = /\b[a-zA-Z]{5,}\b/g;
+    const seen = Object.create(null);
+    const out = [];
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      const w = m[0].toLowerCase();
+      if (!seen[w]) {
+        seen[w] = true;
+        out.push(w);
+      }
+    }
+    return out;
+  }
+
+  function addWordsToVocab(words) {
+    let added = 0;
+    if (!state.vocabulary) state.vocabulary = [];
+    const set = new Set(state.vocabulary.map(function (w) { return w.toLowerCase(); }));
+    words.forEach(function (w) {
+      const lw = w.toLowerCase();
+      if (!set.has(lw)) {
+        set.add(lw);
+        state.vocabulary.push(lw);
+        added++;
+      }
+    });
+    if (added) {
+      addXp(added * 5, 'новые слова');
+      saveState();
+    }
+    return added;
+  }
+
+  // ——— Грамматика: правила (офлайн) ———
+  function fixGrammar(sentence) {
+    let t = sentence.trim();
+    const explanations = [];
+
+    // Множественное число / 3-е лицо
+    t = t.replace(/\bHe go\b/gi, function () {
+      explanations.push('He go → He goes: Present Simple, 3-е лицо ед.ч. — окончание -s.');
+      return 'He goes';
+    });
+    t = t.replace(/\bShe go\b/gi, function () {
+      explanations.push('She go → She goes: то же правило 3-го лица.');
+      return 'She goes';
+    });
+    t = t.replace(/\bIt go\b/gi, function () {
+      explanations.push('It go → It goes.');
+      return 'It goes';
+    });
+
+    // I + прилагательное без глагола to be
+    t = t.replace(/\bI happy\b/gi, function () {
+      explanations.push('I happy → I am happy: после I нужен глагол to be (am) перед прилагательным.');
+      return 'I am happy';
+    });
+    t = t.replace(/\bI (tired|sad|angry|busy|ready|sure)\b/gi, function (m, adj) {
+      explanations.push('I ' + adj + ' → I am ' + adj + ': связка am + прилагательное.');
+      return 'I am ' + adj;
+    });
+
+    // Yesterday + неверное время
+    t = t.replace(/\bYesterday I go\b/gi, function () {
+      explanations.push('Yesterday I go → Yesterday I went: маркер прошедшего времени yesterday → Past Simple (went).');
+      return 'Yesterday I went';
+    });
+    t = t.replace(/\bYesterday ([a-z]+) go\b/gi, function (_, subj) {
+      explanations.push('Yesterday … go → went: согласование Past Simple.');
+      return 'Yesterday ' + subj + ' went';
+    });
+
+    // Предлоги (B1/B2)
+    const prepRules = [
+      { re: /\bin Monday\b/gi, to: 'on Monday', ex: 'Дни недели — предлог on, не in.' },
+      { re: /\bin Tuesday\b/gi, to: 'on Tuesday', ex: 'Дни недели — on.' },
+      { re: /\bon the morning\b/gi, to: 'in the morning', ex: 'Части дня: in the morning/afternoon/evening.' },
+      { re: /\bon the afternoon\b/gi, to: 'in the afternoon', ex: 'Части дня — in.' },
+      { re: /\bon the evening\b/gi, to: 'in the evening', ex: 'Части дня — in (кроме at night).' },
+      { re: /\bat Monday\b/gi, to: 'on Monday', ex: 'Дни недели — on.' },
+      { re: /\bdepend of\b/gi, to: 'depend on', ex: 'Устойчивое depend on.' },
+      { re: /\barrive to\b/gi, to: 'arrive at', ex: 'arrive at + место; arrive in + город/страна.' },
+      { re: /\binterested on\b/gi, to: 'interested in', ex: 'interested in + существительное/группа.' },
+      { re: /\bmarried with\b/gi, to: 'married to', ex: 'married to someone.' },
+      { re: /\bexplain me\b/gi, to: 'explain to me', ex: 'explain to somebody.' }
+    ];
+    prepRules.forEach(function (rule) {
+      rule.re.lastIndex = 0;
+      if (rule.re.test(t)) {
+        rule.re.lastIndex = 0;
+        t = t.replace(rule.re, rule.to);
+        explanations.push(rule.ex);
+      }
+    });
+
+    if (explanations.length === 0) {
+      explanations.push('Явных паттернов из базы не найдено. Проверь артикли, порядок слов и времена вручную.');
+    }
+
+    return { fixed: t, explanations: explanations };
+  }
+
+  // ——— Разбор грамматики в тексте (подсветка) ———
+  const PHRASAL_LIST = [
+    'give up', 'give in', 'look for', 'look after', 'look forward to', 'carry on', 'calm down',
+    'break down', 'break up', 'fall apart', 'get over', 'run out', 'figure out', 'point out',
+    'come back', 'go on', 'hold on', 'wake up', 'grow up', 'turn on', 'turn off', 'find out'
+  ];
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function parseGrammarHtml(text) {
+    if (!text || !text.trim()) return '<span class="text-slate-500">Нет текста.</span>';
+    let s = escapeHtml(text);
+    // Фразовые глаголы (длинные совпадения раньше)
+    const sorted = PHRASAL_LIST.slice().sort(function (a, b) { return b.length - a.length; });
+    sorted.forEach(function (pv) {
+      const re = new RegExp('\\b' + pv.replace(/\s+/g, '\\s+') + '\\b', 'gi');
+      s = s.replace(re, function (m) {
+        return '<span class="hl-phrasal" title="Phrasal verb">' + m + '</span>';
+      });
+    });
+    // Простые маркеры времён: глагол + ed (слова длиной 4+)
+    s = s.replace(/\b([a-z]{3,20}ed)\b/gi, function (m) {
+      if (/^(the|and|red)$/i.test(m)) return m;
+      return '<span class="hl-tense" title="Past / participle form">' + m + '</span>';
+    });
+    s = s.replace(/\b(I|you|we|they)\s+([a-z]{2,20}ing)\b/gi, function (_, a, b) {
+      return a + ' <span class="hl-tense" title="Continuous / gerund">' + b + '</span>';
+    });
+    return s.replace(/\n/g, '<br/>');
+  }
+
+  // ——— Упражнение: слово из текста ———
+  function pickExerciseWord(savedText) {
+    const words = extractWords(savedText || '');
+    return words.length ? words[Math.floor(Math.random() * Math.min(words.length, 12))] : '';
+  }
+
+  function buildExerciseQuestion(word) {
+    if (!word) return { html: 'Нет длинных слов в тексте.', answer: '' };
+    const masked = word.replace(/[aeiou]/gi, '_');
+    return { html: 'Вставь пропущенные буквы: <strong class="text-cyan-300">' + masked + '</strong> (слово из твоего текста).', answer: word.toLowerCase() };
+  }
+
+  // ——— Караоке ———
+  let karaokeLines = [];
+  let karaokeTimes = [];
+  let karaokeIndex = 0;
+  let karaokeRaf = null;
+
+  function parseKaraokeTimings(str) {
+    return str.split(/[\n,]+/).map(function (x) { return parseFloat(x.trim()); }).filter(function (n) { return !isNaN(n); });
+  }
+
+  /**
+   * LRC: [mm:ss] или [mm:ss.xx] (сотые секунды) / [mm:ss.xxx] (миллисекунды).
+   * Несколько меток подряд — дублируют ту же строку текста.
+   * Строки [ar:…] и прочие метаданные без цифрового времени пропускаются.
+   */
+  function lrcTimeToSeconds(minStr, secStr, fracStr) {
+    var sec = parseInt(minStr, 10) * 60 + parseInt(secStr, 10);
+    if (!fracStr) return sec;
+    if (fracStr.length <= 2) return sec + parseInt(fracStr, 10) / 100;
+    return sec + parseInt(fracStr, 10) / 1000;
+  }
+
+  function parseLrcContent(raw) {
+    if (raw == null || !String(raw).trim()) return { error: 'Пустой ввод' };
+    var text = String(raw).trim();
+    if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
+    if (text.charAt(0) === '{') {
+      try {
+        var j = JSON.parse(text);
+        if (j.syncedLyrics) text = j.syncedLyrics;
+        else return { error: 'В JSON нет поля syncedLyrics' };
+      } catch (e) {
+        return { error: 'Не удалось разобрать JSON: ' + (e.message || 'ошибка') };
+      }
+    }
+    var linesOut = [];
+    var timesOut = [];
+    var leadingTags = /^((?:\[\d{1,2}:\d{2}(?:\.\d{1,3})?\]\s*)+)(.*)$/;
+    var tagExtract = /\[(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?\]/g;
+    var rows = text.split(/\r?\n/);
+    for (var r = 0; r < rows.length; r++) {
+      var line = rows[r].replace(/\s+$/, '');
+      if (!line.length) continue;
+      var m = line.match(leadingTags);
+      if (!m) {
+        if (/^\[[a-zA-Z]+:/.test(line.trim())) continue;
+        continue;
+      }
+      var tagBlock = m[1];
+      var rest = m[2] != null ? m[2] : '';
+      var times = [];
+      var tm;
+      tagExtract.lastIndex = 0;
+      while ((tm = tagExtract.exec(tagBlock)) !== null) {
+        times.push(lrcTimeToSeconds(tm[1], tm[2], tm[3]));
+      }
+      if (!times.length) continue;
+      for (var k = 0; k < times.length; k++) {
+        timesOut.push(times[k]);
+        linesOut.push(rest);
+      }
+    }
+    if (!linesOut.length) return { error: 'Не найдено строк вида [mm:ss.xx] текст' };
+    var pairs = linesOut.map(function (l, i) { return { t: timesOut[i], l: l }; });
+    pairs.sort(function (a, b) { return a.t - b.t; });
+    linesOut = pairs.map(function (p) { return p.l; });
+    timesOut = pairs.map(function (p) { return p.t; });
+    return { lines: linesOut, times: timesOut };
+  }
+
+  function applyKaraokeImport(lines, times) {
+    var lyricsText = lines.join('\n');
+    var timingsText = times.map(function (t) { return String(t); }).join('\n');
+    document.getElementById('karaokeLyrics').value = lyricsText;
+    document.getElementById('karaokeTimings').value = timingsText;
+    state.karaokeLyrics = lyricsText;
+    state.karaokeTimings = timingsText;
+    saveState();
+    karaokeLines = lines.slice();
+    karaokeTimes = times.slice();
+    karaokeIndex = 0;
+    renderKaraokeLine();
+  }
+
+  // ——— Кино: локальное видео + SRT/VTT ———
+  var cinemaCues = [];
+  var cinemaVideoObjectUrl = null;
+  var cinemaSelectedWord = '';
+  var cinemaCurrentLine = '';
+  var cinemaLastRenderedCue = '';
+
+  function stripSubTags(s) {
+    return String(s)
+      .replace(/<[^>]+>/g, '')
+      .replace(/\{[^}]+\}/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function parseTimeToSeconds(ts) {
+    ts = String(ts).trim().replace(',', '.');
+    var p = ts.split(':');
+    if (p.length === 3) {
+      return parseInt(p[0], 10) * 3600 + parseInt(p[1], 10) * 60 + parseFloat(p[2]);
+    }
+    if (p.length === 2) {
+      return parseInt(p[0], 10) * 60 + parseFloat(p[1]);
+    }
+    var n = parseFloat(ts);
+    return isNaN(n) ? 0 : n;
+  }
+
+  function parseSrt(raw) {
+    var cues = [];
+    raw = String(raw).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    var blocks = raw.split(/\n\s*\n/);
+    for (var bi = 0; bi < blocks.length; bi++) {
+      var lines = blocks[bi].split('\n');
+      var nonempty = [];
+      for (var j = 0; j < lines.length; j++) {
+        if (lines[j].trim().length) nonempty.push(lines[j]);
+      }
+      if (!nonempty.length) continue;
+      var ti = 0;
+      if (/^\d+$/.test(nonempty[0].trim())) ti = 1;
+      if (ti >= nonempty.length) continue;
+      var timeLine = nonempty[ti];
+      var m = timeLine.match(
+        /(\d{1,2}:\d{2}:\d{2}[,.]\d{1,3}|\d{1,2}:\d{2}[,.]\d{1,3})\s*-->\s*(\d{1,2}:\d{2}:\d{2}[,.]\d{1,3}|\d{1,2}:\d{2}[,.]\d{1,3})/
+      );
+      if (!m) continue;
+      var start = parseTimeToSeconds(m[1]);
+      var end = parseTimeToSeconds(m[2]);
+      var text = stripSubTags(nonempty.slice(ti + 1).join(' '));
+      if (!text) continue;
+      cues.push({ start: start, end: end, text: text });
+    }
+    return cues;
+  }
+
+  function parseVtt(raw) {
+    var cues = [];
+    raw = String(raw).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    raw = raw.replace(/^WEBVTT[^\n]*\n/i, '');
+    var blocks = raw.split(/\n\s*\n/);
+    for (var bi = 0; bi < blocks.length; bi++) {
+      var lines = blocks[bi].split('\n');
+      var nonempty = [];
+      for (var j = 0; j < lines.length; j++) {
+        if (lines[j].trim().length) nonempty.push(lines[j]);
+      }
+      if (!nonempty.length) continue;
+      if (nonempty[0].indexOf('-->') === -1) continue;
+      var m = nonempty[0].match(/([\d:.]+)\s*-->\s*([\d:.]+)/);
+      if (!m) continue;
+      var start = parseTimeToSeconds(m[1]);
+      var end = parseTimeToSeconds(m[2]);
+      var text = stripSubTags(nonempty.slice(1).join(' '));
+      if (!text) continue;
+      cues.push({ start: start, end: end, text: text });
+    }
+    return cues;
+  }
+
+  function parseSubtitleByName(fileName, raw) {
+    var lower = (fileName || '').toLowerCase();
+    if (lower.endsWith('.vtt')) return parseVtt(raw);
+    return parseSrt(raw);
+  }
+
+  function getActiveCue(cues, t) {
+    for (var i = 0; i < cues.length; i++) {
+      if (t >= cues[i].start && t < cues[i].end) return cues[i];
+    }
+    for (var j = 0; j < cues.length; j++) {
+      if (t >= cues[j].start && t <= cues[j].end) return cues[j];
+    }
+    return null;
+  }
+
+  function renderCinemaSubWords(text) {
+    var container = document.getElementById('cinemaSubLine');
+    if (!container) return;
+    container.innerHTML = '';
+    var parts = String(text).split(/(\s+)/);
+    parts.forEach(function (part) {
+      if (!part) return;
+      if (/^\s+$/.test(part)) {
+        container.appendChild(document.createTextNode(part));
+        return;
+      }
+      var clean = part.replace(/[^a-zA-Z'-]/g, '');
+      if (clean.length >= 1) {
+        var span = document.createElement('span');
+        span.className = 'sub-word';
+        span.textContent = part;
+        span.setAttribute('data-w', clean.toLowerCase());
+        span.addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          var w = span.getAttribute('data-w');
+          cinemaSelectedWord = w || '';
+          container.querySelectorAll('.sub-word').forEach(function (el) {
+            el.classList.remove('sub-word--picked');
+          });
+          span.classList.add('sub-word--picked');
+          var pw = document.getElementById('cinemaPickedWord');
+          if (pw) pw.textContent = w || '—';
+          if (w) {
+            addWordsToVocab([w]);
+            refreshVocab();
+            refreshDashboard();
+          }
+        });
+        container.appendChild(span);
+      } else {
+        container.appendChild(document.createTextNode(part));
+      }
+    });
+  }
+
+  function cinemaTimeUpdate() {
+    var vid = document.getElementById('cinemaVideo');
+    if (!vid || !cinemaCues.length) return;
+    var cue = getActiveCue(cinemaCues, vid.currentTime);
+    var subEl = document.getElementById('cinemaSubLine');
+    var plain = document.getElementById('cinemaLinePlain');
+    if (!cue) {
+      if (subEl) subEl.textContent = '—';
+      cinemaCurrentLine = '';
+      cinemaLastRenderedCue = '';
+      if (plain) plain.textContent = '—';
+      return;
+    }
+    if (cue.text === cinemaLastRenderedCue) return;
+    cinemaLastRenderedCue = cue.text;
+    cinemaCurrentLine = cue.text;
+    if (plain) plain.textContent = cue.text;
+    renderCinemaSubWords(cue.text);
+  }
+
+  function wordStudyHints(word) {
+    var w = (word || '').toLowerCase();
+    var hints = [];
+    if (/tion$|sion$|ness$|ment$|ity$|ance$|ence$/.test(w)) hints.push('Суффикс существительного / отглагольного имени.');
+    if (/ing$/.test(w) && w.length > 4) hints.push('Окончание -ing: герундий, причастие или Continuous.');
+    if (/ed$/.test(w) && w.length > 3) hints.push('Часто Past Simple / Past Participle (правильный глагол).');
+    if (/ly$/.test(w) && w.length > 3) hints.push('Наречие (часто прилагательное + -ly).');
+    if (!hints.length) hints.push('Смотри контекст реплики; для разбора идиом и оттенков удобен AI.');
+    return hints.join(' ');
+  }
+
+  function callAiChat(systemPrompt, userPrompt) {
+    return new Promise(function (resolve, reject) {
+      var base = (state.aiBaseUrl || '').replace(/\/$/, '');
+      var key = (state.aiApiKey || '').trim();
+      if (!key) {
+        reject(new Error('Укажи API-ключ в блоке «Настройки AI».'));
+        return;
+      }
+      var url = base + '/chat/completions';
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + key
+        },
+        body: JSON.stringify({
+          model: state.aiModel || 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+          max_tokens: 700,
+          temperature: 0.35
+        })
+      })
+        .then(function (res) {
+          if (!res.ok) {
+            return res.text().then(function (t) {
+              throw new Error(t || res.statusText);
+            });
+          }
+          return res.json();
+        })
+        .then(function (data) {
+          var txt = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+          if (!txt) throw new Error('Пустой ответ модели');
+          resolve(String(txt).trim());
+        })
+        .catch(reject);
+    });
+  }
+
+  function renderKaraokeLine() {
+    const el = document.getElementById('karaokeDisplay');
+    if (!el) return;
+    const line = karaokeLines[karaokeIndex] || '';
+    const words = line.split(/\s+/).filter(Boolean);
+    el.innerHTML = words.map(function (w) {
+      const clean = w.replace(/[^a-zA-Z'-]/g, '');
+      if (!clean) return '<span>' + escapeHtml(w) + '</span>';
+      return '<span class="karaoke-word inline-block mr-1" data-w="' + escapeHtml(clean.toLowerCase()) + '">' + escapeHtml(w) + '</span>';
+    }).join(' ');
+    el.classList.add('karaoke-line', 'active');
+    el.querySelectorAll('.karaoke-word').forEach(function (span) {
+      span.addEventListener('click', function () {
+        const w = span.getAttribute('data-w');
+        if (w && w.length > 1) {
+          addWordsToVocab([w]);
+          refreshVocab();
+        }
+      });
+    });
+  }
+
+  function karaokeTick() {
+    const audio = document.getElementById('karaokeAudio');
+    if (!audio || !karaokeTimes.length || !karaokeLines.length) {
+      karaokeRaf = requestAnimationFrame(karaokeTick);
+      return;
+    }
+    const t = audio.currentTime;
+    let idx = 0;
+    const maxI = Math.min(karaokeTimes.length, karaokeLines.length) - 1;
+    for (let i = maxI; i >= 0; i--) {
+      if (t >= karaokeTimes[i]) {
+        idx = i;
+        break;
+      }
+    }
+    idx = Math.max(0, Math.min(idx, karaokeLines.length - 1));
+    if (idx !== karaokeIndex) {
+      karaokeIndex = idx;
+      renderKaraokeLine();
+    }
+    karaokeRaf = requestAnimationFrame(karaokeTick);
+  }
+
+  // ——— UI refresh ———
+  function refreshDashboard() {
+    const xp = state.xp || 0;
+    const elXp = document.getElementById('statXp');
+    const elLv = document.getElementById('statLevel');
+    const elV = document.getElementById('statVocab');
+    const elS = document.getElementById('statStreak');
+    if (elXp) elXp.textContent = String(xp);
+    if (elLv) elLv.textContent = getLevel(xp).name;
+    if (elV) elV.textContent = String((state.vocabulary || []).length);
+    if (elS) elS.textContent = String(state.streak.count || 0);
+    const bar = document.getElementById('levelProgressBar');
+    const txt = document.getElementById('levelProgressText');
+    const prog = levelProgress(xp);
+    if (bar) bar.style.width = prog.pct + '%';
+    if (txt) txt.textContent = prog.text;
+
+    const uname = (state.username || '').trim() || 'друг';
+    const greet = document.getElementById('greeting');
+    const head = document.getElementById('headline');
+    if (greet) greet.textContent = 'Привет, ' + uname + '!';
+    if (head) head.textContent = 'Твой прогресс сегодня';
+
+    const chStatus = document.getElementById('dailyChallengeStatus');
+    const today = todayStr();
+    if (state.challengeDate === today && state.challengeDone) {
+      if (chStatus) chStatus.textContent = 'Челлендж на сегодня выполнен ✓';
+    } else {
+      if (chStatus) chStatus.textContent = '';
+    }
+  }
+
+  function refreshVocab() {
+    const list = document.getElementById('vocabList');
+    const empty = document.getElementById('vocabEmpty');
+    const countH = document.getElementById('vocabCountHeader');
+    const words = state.vocabulary || [];
+    if (countH) countH.textContent = String(words.length);
+    if (!list) return;
+    list.innerHTML = '';
+    if (words.length === 0) {
+      if (empty) empty.classList.remove('hidden');
+      return;
+    }
+    if (empty) empty.classList.add('hidden');
+    words.sort().forEach(function (w) {
+      const chip = document.createElement('span');
+      chip.className = 'inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-slate-800/80 border border-cyan-500/20 text-sm';
+      chip.innerHTML = '<span>' + escapeHtml(w) + '</span>' +
+        '<button type="button" class="text-cyan-400 hover:text-white ml-1 play-word" data-w="' + escapeHtml(w) + '" title="Слушать">🔊</button>' +
+        '<button type="button" class="text-red-400 hover:text-red-200 ml-0.5 del-word" data-w="' + escapeHtml(w) + '" title="Удалить">×</button>';
+      list.appendChild(chip);
+    });
+    list.querySelectorAll('.play-word').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        speakBritish(btn.getAttribute('data-w'));
+      });
+    });
+    list.querySelectorAll('.del-word').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const w = btn.getAttribute('data-w');
+        state.vocabulary = (state.vocabulary || []).filter(function (x) { return x !== w; });
+        saveState();
+        refreshVocab();
+        refreshDashboard();
+      });
+    });
+  }
+
+  function syncFormsFromState() {
+    const u = document.getElementById('usernameInput');
+    const um = document.getElementById('usernameInputMobile');
+    if (u) u.value = state.username || '';
+    if (um) um.value = state.username || '';
+    document.getElementById('f1Input').value = state.f1Text || '';
+    document.getElementById('bondInput').value = state.bondText || '';
+    document.getElementById('annInput').value = state.annText || '';
+    document.getElementById('neckInput').value = state.neckText || '';
+    document.getElementById('karaokeLyrics').value = state.karaokeLyrics || '';
+    document.getElementById('karaokeTimings').value = state.karaokeTimings || '';
+    if (state.f1Text) {
+      document.getElementById('f1Preview').textContent = state.f1Text;
+      document.getElementById('f1PreviewWrap').classList.remove('hidden');
+    }
+    if (state.bondText) {
+      document.getElementById('bondPreview').textContent = state.bondText;
+      document.getElementById('bondPreviewWrap').classList.remove('hidden');
+    }
+    karaokeLines = (state.karaokeLyrics || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+    karaokeTimes = parseKaraokeTimings(state.karaokeTimings || '');
+    if (karaokeLines.length) {
+      karaokeIndex = 0;
+      renderKaraokeLine();
+    }
+    var cab = document.getElementById('cinemaAiBase');
+    var cak = document.getElementById('cinemaAiKey');
+    var cam = document.getElementById('cinemaAiModel');
+    if (cab) cab.value = state.aiBaseUrl || 'https://api.openai.com/v1';
+    if (cak) cak.value = state.aiApiKey || '';
+    if (cam) cam.value = state.aiModel || 'gpt-4o-mini';
+  }
+
+  // ——— Навигация ———
+  const tabs = [
+    { id: 'dashboard', icon: '📊', label: 'Дашборд' },
+    { id: 'f1', icon: '🏎️', label: 'F1' },
+    { id: 'bond', icon: '🎬', label: 'Бонд' },
+    { id: 'music', icon: '🎸', label: 'Музыка' },
+    { id: 'karaoke', icon: '🎤', label: 'Караоке' },
+    { id: 'cinema', icon: '📽', label: 'Кино' },
+    { id: 'vocab', icon: '📚', label: 'Словарь' },
+    { id: 'grammar', icon: '🧠', label: 'Грамматика' }
+  ];
+
+  let activeTab = 'dashboard';
+
+  function setTab(id) {
+    activeTab = id;
+    tabs.forEach(function (t) {
+      const panel = document.getElementById('panel-' + t.id);
+      if (panel) panel.classList.toggle('active', t.id === id);
+    });
+    document.querySelectorAll('#desktopNav .nav-item').forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-tab') === id);
+    });
+    document.querySelectorAll('#mobileNav .bottom-nav-item').forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-tab') === id);
+    });
+  }
+
+  function buildNav() {
+    const desk = document.getElementById('desktopNav');
+    const mob = document.getElementById('mobileNav');
+    desk.innerHTML = '';
+    mob.innerHTML = '';
+    tabs.forEach(function (t) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm text-slate-300 border border-transparent w-full transition';
+      b.setAttribute('data-tab', t.id);
+      b.innerHTML = '<span class="text-lg">' + t.icon + '</span><span>' + t.label + '</span>';
+      b.addEventListener('click', function () { setTab(t.id); });
+      desk.appendChild(b);
+
+      const mb = document.createElement('button');
+      mb.type = 'button';
+      mb.className = 'bottom-nav-item flex flex-col items-center gap-0.5 px-1.5 py-1 text-[10px] text-slate-500 shrink-0 min-w-[52px]';
+      mb.setAttribute('data-tab', t.id);
+      mb.innerHTML = '<span class="nav-icon text-xl leading-none">' + t.icon + '</span><span class="truncate w-full text-center">' + t.label.split(' ')[0] + '</span>';
+      mb.addEventListener('click', function () { setTab(t.id); });
+      mob.appendChild(mb);
+    });
+  }
+
+  // ——— События ———
+  function bind() {
+    function onUsernameInput(e) {
+      state.username = e.target.value;
+      saveState();
+      var desk = document.getElementById('usernameInput');
+      var mob = document.getElementById('usernameInputMobile');
+      if (desk && mob && e.target !== desk) desk.value = state.username;
+      if (desk && mob && e.target !== mob) mob.value = state.username;
+      refreshDashboard();
+    }
+    document.getElementById('usernameInput').addEventListener('input', onUsernameInput);
+    document.getElementById('usernameInputMobile').addEventListener('input', onUsernameInput);
+
+    document.getElementById('btnDailyChallenge').addEventListener('click', function () {
+      const today = todayStr();
+      if (state.challengeDate === today && state.challengeDone) {
+        alert('Челлендж уже выполнен сегодня.');
+        return;
+      }
+      const text = document.getElementById('dailyChallenge').value.trim();
+      if (text.length < 10) {
+        alert('Напиши чуть больше текста (минимум пара предложений).');
+        return;
+      }
+      state.challengeDate = today;
+      state.challengeDone = true;
+      addXp(15, 'ежедневный челлендж');
+      saveState();
+      refreshDashboard();
+    });
+
+    document.getElementById('btnF1Save').addEventListener('click', function () {
+      state.f1Text = document.getElementById('f1Input').value;
+      saveState();
+      document.getElementById('f1Preview').textContent = state.f1Text;
+      document.getElementById('f1PreviewWrap').classList.remove('hidden');
+    });
+    document.getElementById('btnF1Words').addEventListener('click', function () {
+      const text = document.getElementById('f1Input').value;
+      const n = addWordsToVocab(extractWords(text));
+      alert('Добавлено новых слов: ' + n + ' (по +5 XP каждое).');
+      refreshVocab();
+      refreshDashboard();
+    });
+    document.getElementById('btnF1Speak').addEventListener('click', function () {
+      speakBritish(document.getElementById('f1Input').value);
+    });
+
+    document.getElementById('btnBondSave').addEventListener('click', function () {
+      state.bondText = document.getElementById('bondInput').value;
+      saveState();
+      document.getElementById('bondPreview').textContent = state.bondText;
+      document.getElementById('bondPreviewWrap').classList.remove('hidden');
+    });
+    document.getElementById('btnBondWords').addEventListener('click', function () {
+      const n = addWordsToVocab(extractWords(document.getElementById('bondInput').value));
+      alert('Добавлено новых слов: ' + n);
+      refreshVocab();
+      refreshDashboard();
+    });
+    document.getElementById('btnBondSpeak').addEventListener('click', function () {
+      speakBritish(document.getElementById('bondInput').value);
+    });
+
+    // Music subtabs
+    document.getElementById('tabMusicAnn').addEventListener('click', function () {
+      document.getElementById('musicAnnPanel').classList.remove('hidden');
+      document.getElementById('musicNeckPanel').classList.add('hidden');
+      document.getElementById('tabMusicAnn').classList.add('active', 'bg-cyan-500/15', 'text-cyan-200');
+      document.getElementById('tabMusicNeck').classList.remove('active', 'bg-cyan-500/15', 'text-cyan-200');
+    });
+    document.getElementById('tabMusicNeck').addEventListener('click', function () {
+      document.getElementById('musicNeckPanel').classList.remove('hidden');
+      document.getElementById('musicAnnPanel').classList.add('hidden');
+      document.getElementById('tabMusicNeck').classList.add('active', 'bg-cyan-500/15', 'text-cyan-200');
+      document.getElementById('tabMusicAnn').classList.remove('active', 'bg-cyan-500/15', 'text-cyan-200');
+    });
+    document.getElementById('tabMusicAnn').classList.add('active', 'bg-cyan-500/15', 'text-cyan-200');
+
+    function bindMusic(prefix, inputId, saveId, wordsId, speakId, gramId, gramOutId, exQ, exA, exBtn, exRef, exFeed, storageKey) {
+      document.getElementById(saveId).addEventListener('click', function () {
+        state[storageKey] = document.getElementById(inputId).value;
+        saveState();
+      });
+      document.getElementById(wordsId).addEventListener('click', function () {
+        const n = addWordsToVocab(extractWords(document.getElementById(inputId).value));
+        alert('Новых слов: ' + n);
+        refreshVocab();
+        refreshDashboard();
+      });
+      document.getElementById(speakId).addEventListener('click', function () {
+        speakBritish(document.getElementById(inputId).value);
+      });
+      document.getElementById(gramId).addEventListener('click', function () {
+        document.getElementById(gramOutId).innerHTML = parseGrammarHtml(document.getElementById(inputId).value);
+      });
+      function refreshEx() {
+        const w = pickExerciseWord(state[storageKey]);
+        state[prefix + 'ExerciseWord'] = w;
+        const q = buildExerciseQuestion(w);
+        document.getElementById(exQ).innerHTML = q.html;
+        document.getElementById(exA).value = '';
+        document.getElementById(exFeed).textContent = '';
+        saveState();
+      }
+      document.getElementById(exRef).addEventListener('click', refreshEx);
+      document.getElementById(exBtn).addEventListener('click', function () {
+        const ans = document.getElementById(exA).value.trim().toLowerCase();
+        const expected = (state[prefix + 'ExerciseWord'] || '').toLowerCase();
+        if (!expected) {
+          document.getElementById(exFeed).textContent = 'Сначала сохрани текст и обнови упражнение.';
+          document.getElementById(exFeed).className = 'text-sm mt-2 text-amber-400';
+          return;
+        }
+        if (ans === expected) {
+          addXp(5, 'упражнение ' + prefix);
+          document.getElementById(exFeed).textContent = 'Верно!';
+          document.getElementById(exFeed).className = 'text-sm mt-2 text-cyan-400';
+        } else {
+          document.getElementById(exFeed).textContent = 'Почти — правильный ответ: ' + expected;
+          document.getElementById(exFeed).className = 'text-sm mt-2 text-red-400';
+        }
+        refreshDashboard();
+      });
+      refreshEx();
+    }
+
+    bindMusic('ann', 'annInput', 'btnAnnSave', 'btnAnnWords', 'btnAnnSpeak', 'btnAnnGrammar', 'annGrammarOut',
+      'annExerciseQ', 'annExerciseA', 'btnAnnExercise', 'btnAnnExerciseRefresh', 'annExerciseFeedback', 'annText');
+    bindMusic('neck', 'neckInput', 'btnNeckSave', 'btnNeckWords', 'btnNeckSpeak', 'btnNeckGrammar', 'neckGrammarOut',
+      'neckExerciseQ', 'neckExerciseA', 'btnNeckExercise', 'btnNeckExerciseRefresh', 'neckExerciseFeedback', 'neckText');
+
+    // Karaoke
+    document.getElementById('karaokeFile').addEventListener('change', function (e) {
+      const f = e.target.files && e.target.files[0];
+      const audio = document.getElementById('karaokeAudio');
+      if (!f || !audio) return;
+      audio.src = URL.createObjectURL(f);
+    });
+    document.getElementById('btnKaraokeImportLrc').addEventListener('click', function () {
+      var paste = document.getElementById('karaokeLrcPaste');
+      var raw = paste ? paste.value : '';
+      var result = parseLrcContent(raw);
+      if (result.error) {
+        alert(result.error);
+        return;
+      }
+      applyKaraokeImport(result.lines, result.times);
+    });
+    document.getElementById('btnKaraokeSave').addEventListener('click', function () {
+      state.karaokeLyrics = document.getElementById('karaokeLyrics').value;
+      state.karaokeTimings = document.getElementById('karaokeTimings').value;
+      saveState();
+      karaokeLines = state.karaokeLyrics.split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+      karaokeTimes = parseKaraokeTimings(state.karaokeTimings);
+      karaokeIndex = 0;
+      renderKaraokeLine();
+    });
+    document.getElementById('btnKaraokePrev').addEventListener('click', function () {
+      karaokeIndex = Math.max(0, karaokeIndex - 1);
+      renderKaraokeLine();
+    });
+    document.getElementById('btnKaraokeNext').addEventListener('click', function () {
+      karaokeIndex = Math.min(karaokeLines.length - 1, karaokeIndex + 1);
+      renderKaraokeLine();
+    });
+    document.getElementById('btnKaraokeReset').addEventListener('click', function () {
+      karaokeIndex = 0;
+      const audio = document.getElementById('karaokeAudio');
+      if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+      renderKaraokeLine();
+    });
+
+    const karaokeAudio = document.getElementById('karaokeAudio');
+    karaokeAudio.addEventListener('play', function () {
+      if (karaokeRaf) cancelAnimationFrame(karaokeRaf);
+      karaokeRaf = requestAnimationFrame(karaokeTick);
+    });
+    karaokeAudio.addEventListener('pause', function () {
+      if (karaokeRaf) cancelAnimationFrame(karaokeRaf);
+    });
+    karaokeAudio.addEventListener('ended', function () {
+      if (karaokeRaf) cancelAnimationFrame(karaokeRaf);
+    });
+
+    document.getElementById('btnExportVocab').addEventListener('click', function () {
+      const blob = new Blob([JSON.stringify({ words: state.vocabulary, exported: new Date().toISOString() }, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'english-lab-vocab.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    document.getElementById('btnGrammarCheck').addEventListener('click', function () {
+      const raw = document.getElementById('grammarInput').value;
+      if (!raw.trim()) {
+        alert('Введи предложение.');
+        return;
+      }
+      const result = fixGrammar(raw);
+      document.getElementById('grammarFixed').textContent = result.fixed;
+      document.getElementById('grammarExplain').innerHTML = result.explanations.map(function (e) {
+        return '• ' + e;
+      }).join('<br/>');
+      document.getElementById('grammarResult').classList.remove('hidden');
+      addXp(8, 'проверка грамматики');
+      refreshDashboard();
+    });
+
+    var cinemaVideoEl = document.getElementById('cinemaVideo');
+    document.getElementById('cinemaVideoFile').addEventListener('change', function (e) {
+      var f = e.target.files && e.target.files[0];
+      var hint = document.getElementById('cinemaFileHint');
+      if (!f || !cinemaVideoEl) return;
+      if (cinemaVideoObjectUrl) URL.revokeObjectURL(cinemaVideoObjectUrl);
+      cinemaVideoObjectUrl = URL.createObjectURL(f);
+      cinemaVideoEl.src = cinemaVideoObjectUrl;
+      if (hint) hint.textContent = 'Видео: ' + f.name;
+    });
+    document.getElementById('cinemaSubFile').addEventListener('change', function (e) {
+      var f = e.target.files && e.target.files[0];
+      var hint = document.getElementById('cinemaFileHint');
+      if (!f) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        try {
+          cinemaCues = parseSubtitleByName(f.name, reader.result);
+          cinemaLastRenderedCue = '';
+          cinemaTimeUpdate();
+          if (hint) hint.textContent = 'Субтитры: ' + f.name + ' · ' + cinemaCues.length + ' реплик';
+        } catch (err) {
+          console.warn(err);
+          cinemaCues = [];
+          if (hint) hint.textContent = 'Не удалось разобрать файл субтитров.';
+        }
+      };
+      reader.readAsText(f, 'UTF-8');
+    });
+    cinemaVideoEl.addEventListener('timeupdate', cinemaTimeUpdate);
+    cinemaVideoEl.addEventListener('seeked', cinemaTimeUpdate);
+
+    document.getElementById('btnCinemaAddWord').addEventListener('click', function () {
+      var w = (cinemaSelectedWord || '').trim();
+      if (!w) {
+        alert('Сначала кликни по слову в субтитрах.');
+        return;
+      }
+      var n = addWordsToVocab([w]);
+      if (n) refreshVocab();
+      refreshDashboard();
+    });
+    document.getElementById('btnCinemaSpeakWord').addEventListener('click', function () {
+      var w = cinemaSelectedWord || '';
+      if (!w) {
+        alert('Выбери слово кликом.');
+        return;
+      }
+      speakBritish(w);
+    });
+    document.getElementById('btnCinemaOfflineSentence').addEventListener('click', function () {
+      var line = (cinemaCurrentLine || '').trim();
+      var out = document.getElementById('cinemaAnalysisOut');
+      if (!line) {
+        if (out) out.textContent = 'Нет активной реплики — включи видео или перемотай на диалог.';
+        return;
+      }
+      var g = fixGrammar(line);
+      var html =
+        '<p class="text-cyan-300/90 font-medium mb-2">Офлайн-разбор предложения</p>' +
+        '<p class="text-slate-400 text-xs mb-1">Исправленный вариант (эвристики):</p>' +
+        '<p class="mb-3">' +
+        escapeHtml(g.fixed) +
+        '</p>' +
+        '<p class="text-slate-400 text-xs mb-1">Подсказки:</p>' +
+        '<p class="text-slate-300">' +
+        g.explanations.map(function (x) {
+          return '• ' + escapeHtml(x);
+        }).join('<br/>') +
+        '</p>' +
+        '<p class="text-slate-500 text-xs mt-3">Грамматическая подсветка:</p>' +
+        '<div class="mt-1 text-sm">' +
+        parseGrammarHtml(line) +
+        '</div>';
+      if (out) out.innerHTML = html;
+    });
+    document.getElementById('btnCinemaOfflineWord').addEventListener('click', function () {
+      var w = (cinemaSelectedWord || '').trim();
+      var out = document.getElementById('cinemaAnalysisOut');
+      if (!w) {
+        if (out) out.textContent = 'Кликни по слову в строке субтитров.';
+        return;
+      }
+      var h = wordStudyHints(w);
+      if (out) {
+        out.innerHTML =
+          '<p class="text-cyan-300/90 font-medium mb-2">Офлайн: слово «' +
+          escapeHtml(w) +
+          '»</p>' +
+          '<p class="text-slate-300">' +
+          escapeHtml(h) +
+          '</p>';
+      }
+      speakBritish(w);
+    });
+
+    var aiSystem =
+      'Ты помощник по английскому для русскоязычного ученика уровня B1–C1. Отвечай кратко по-русски: смысл, коллокации, грамматика по делу. Без лишней воды.';
+
+    function cinemaAiLoading() {
+      var out = document.getElementById('cinemaAnalysisOut');
+      if (out) out.innerHTML = '<p class="text-violet-300/80 animate-pulse">Запрос к модели…</p>';
+    }
+
+    document.getElementById('btnCinemaAiSentence').addEventListener('click', function () {
+      var line = (cinemaCurrentLine || '').trim();
+      var out = document.getElementById('cinemaAnalysisOut');
+      if (!line) {
+        if (out) out.textContent = 'Нет реплики — дождись субтитров по таймкоду.';
+        return;
+      }
+      cinemaAiLoading();
+      callAiChat(aiSystem, 'Разбери целиком эту реплику из субтитров фильма (лексика, идиомы, грамматика, нюансы):\n\n' + line)
+        .then(function (txt) {
+          if (out) {
+            out.innerHTML =
+              '<p class="text-violet-300 font-medium mb-2">AI · предложение</p><p class="text-slate-200 whitespace-pre-wrap">' +
+              escapeHtml(txt).replace(/\n/g, '<br/>') +
+              '</p>';
+          }
+        })
+        .catch(function (err) {
+          if (out) {
+            out.innerHTML =
+              '<p class="text-red-400 text-sm">Ошибка: ' + escapeHtml(err.message || String(err)) + '</p><p class="text-slate-500 text-xs mt-2">Проверь ключ, URL и CORS (для OpenAI из браузера часто нужен прокси или локальный LM Studio).</p>';
+          }
+        });
+    });
+    document.getElementById('btnCinemaAiWord').addEventListener('click', function () {
+      var w = (cinemaSelectedWord || '').trim();
+      var line = (cinemaCurrentLine || '').trim();
+      var out = document.getElementById('cinemaAnalysisOut');
+      if (!w) {
+        if (out) out.textContent = 'Сначала выбери слово кликом по субтитру.';
+        return;
+      }
+      cinemaAiLoading();
+      callAiChat(
+        aiSystem,
+        'Контекст — реплика из фильма:\n' +
+          line +
+          '\n\nРазбери только слово «' +
+          w +
+          '»: значение здесь, устойчивые связки, синонимы, типичные ошибки русскоязычных.'
+      )
+        .then(function (txt) {
+          if (out) {
+            out.innerHTML =
+              '<p class="text-violet-300 font-medium mb-2">AI · слово «' +
+              escapeHtml(w) +
+              '»</p><p class="text-slate-200 whitespace-pre-wrap">' +
+              escapeHtml(txt).replace(/\n/g, '<br/>') +
+              '</p>';
+          }
+        })
+        .catch(function (err) {
+          if (out) {
+            out.innerHTML =
+              '<p class="text-red-400 text-sm">Ошибка: ' + escapeHtml(err.message || String(err)) + '</p>';
+          }
+        });
+    });
+    document.getElementById('btnCinemaAiSave').addEventListener('click', function () {
+      state.aiBaseUrl = document.getElementById('cinemaAiBase').value.trim() || 'https://api.openai.com/v1';
+      state.aiApiKey = document.getElementById('cinemaAiKey').value;
+      state.aiModel = document.getElementById('cinemaAiModel').value.trim() || 'gpt-4o-mini';
+      saveState();
+      var out = document.getElementById('cinemaAnalysisOut');
+      if (out) out.innerHTML = '<p class="text-cyan-400/90 text-sm">Настройки AI сохранены в этом браузере.</p>';
+    });
+  }
+
+  // Init
+  loadState();
+  buildNav();
+  setTab('dashboard');
+  bind();
+  syncFormsFromState();
+  refreshDashboard();
+  refreshVocab();
+})();
+  </script>
+</body>
+</html>

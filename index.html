@@ -1,0 +1,2158 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>C1 PULSE — Music</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            bg: { DEFAULT: '#0a0a0a', card: '#121212', hover: '#1f1f1f', elevated: '#282828' },
+            accent: { green: '#1DB954', cyan: '#38bdf8' },
+            text: { primary: '#ffffff', secondary: '#b3b3b3', muted: '#6a6a6a' }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #0a0a0a;
+      color: #ffffff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #121212;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #333;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+
+    /* Анимации */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse-green {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(29, 185, 84, 0.4);
+      }
+
+      50% {
+        box-shadow: 0 0 0 8px rgba(29, 185, 84, 0);
+      }
+    }
+
+    @keyframes glow {
+
+      0%,
+      100% {
+        text-shadow: 0 0 20px rgba(29, 185, 84, 0.3);
+      }
+
+      50% {
+        text-shadow: 0 0 40px rgba(29, 185, 84, 0.6);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+      }
+
+      to {
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideOutRight {
+      from {
+        transform: translateX(0);
+      }
+
+      to {
+        transform: translateX(100%);
+      }
+    }
+
+    .animate-fade {
+      animation: fadeIn 0.35s ease forwards;
+    }
+
+    .animate-slide-up {
+      animation: slideUp 0.4s ease forwards;
+    }
+
+    .animate-glow {
+      animation: glow 2s ease-in-out infinite;
+    }
+
+    .pulse-save {
+      animation: pulse-green 0.6s ease;
+    }
+
+    /* Скрытые панели */
+    .view-panel {
+      display: none;
+    }
+
+    .view-panel.active {
+      display: block;
+    }
+
+    /* Карточки песен */
+    .song-card {
+      background: #121212;
+      border-radius: 8px;
+      padding: 16px;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .song-card:hover {
+      background: #1f1f1f;
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .song-card .play-overlay {
+      position: absolute;
+      bottom: 80px;
+      right: 24px;
+      width: 48px;
+      height: 48px;
+      background: #1DB954;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .song-card:hover .play-overlay {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Караоке */
+    .karaoke-line {
+      transition: all 0.3s ease;
+      opacity: 0.35;
+    }
+
+    .karaoke-line.active {
+      opacity: 1;
+      color: #1DB954;
+      font-weight: 700;
+      text-shadow: 0 0 30px rgba(29, 185, 84, 0.3);
+      transform: scale(1.02);
+    }
+
+    .karaoke-word {
+      display: inline-block;
+      padding: 2px 4px;
+      margin: 0 2px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .karaoke-word:hover {
+      background: rgba(29, 185, 84, 0.2);
+      color: #1DB954;
+    }
+
+    /* Плеер */
+    #player-bar {
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(18, 18, 18, 0.92);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* Модалки */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #282828;
+      border-radius: 12px;
+      padding: 32px;
+      max-width: 520px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s ease;
+    }
+
+    /* Кнопки */
+    .btn-green {
+      background: #1DB954;
+      color: #000;
+      font-weight: 700;
+      border-radius: 9999px;
+      padding: 12px 32px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-green:hover {
+      background: #1ed760;
+      transform: scale(1.04);
+    }
+
+    .btn-green:active {
+      transform: scale(0.98);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 9999px;
+      padding: 8px 20px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: 13px;
+    }
+
+    .btn-outline:hover {
+      border-color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Формы */
+    .input-dark {
+      background: #333;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 14px;
+      width: 100%;
+      transition: border-color 0.2s;
+    }
+
+    .input-dark:focus {
+      outline: none;
+      border-color: #1DB954;
+    }
+
+    .input-dark::placeholder {
+      color: #6a6a6a;
+    }
+
+    label {
+      color: #b3b3b3;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* Сайдбар плейлистов */
+    #playlistSidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 320px;
+      height: 100vh;
+      background: #121212;
+      border-left: 1px solid rgba(255, 255, 255, 0.06);
+      z-index: 80;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      overflow-y: auto;
+    }
+
+    #playlistSidebar.open {
+      transform: translateX(0);
+    }
+
+    /* Слово-попап в караоке */
+    #wordPopup {
+      position: fixed;
+      background: #282828;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 16px;
+      z-index: 90;
+      min-width: 260px;
+      max-width: 340px;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+
+    #wordPopup.show {
+      display: block;
+    }
+
+    /* Полноэкранный плеер */
+    #fullPlayerOverlay {
+      position: fixed;
+      inset: 0;
+      background: #1a1a2e;
+      z-index: 200;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: slideUpFull 0.35s ease;
+      transition: background 0.8s ease;
+    }
+
+    #fullPlayerOverlay.show {
+      display: flex;
+    }
+
+    @keyframes slideUpFull {
+      from {
+        opacity: 0;
+        transform: translateY(100%);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .full-player-cover {
+      width: 280px;
+      height: 280px;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    }
+
+    .full-player-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .full-player-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #1f1f1f, #282828);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+      opacity: 0.2;
+    }
+
+    /* Плавные переходы караоке — как в Яндекс Музыке */
+    .karaoke-line {
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    #karaokeCurrLine {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #karaokePrevLine {
+      opacity: 0.25;
+      transform: translateY(-6px);
+    }
+
+    #karaokeNextLine {
+      opacity: 0.2;
+      transform: translateY(6px);
+    }
+
+    /* Repeat mode карточки */
+    .flashcard {
+      background: linear-gradient(135deg, #1f1f1f, #282828);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 48px 32px;
+      text-align: center;
+      transition: transform 0.4s ease;
+      cursor: pointer;
+    }
+
+    .flashcard:hover {
+      transform: translateY(-2px);
+    }
+
+    .flashcard.flipped {
+      transform: rotateY(180deg);
+    }
+
+    /* Адаптив */
+    @media (max-width: 768px) {
+      .song-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+
+      #player-bar .player-volume-wrap {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .song-grid {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      background: #1DB954;
+      color: #000;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      z-index: 200;
+      transform: translateX(120%);
+      transition: transform 0.3s ease;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ====== ТОСТ ====== -->
+  <div id="toast" class="toast"></div>
+
+  <!-- ====== ОСНОВНОЙ LAYOUT ====== -->
+  <div class="flex min-h-screen" style="padding-bottom: 100px;">
+
+    <!-- Сайдбар (десктоп) -->
+    <aside id="sidebar"
+      class="hidden lg:flex flex-col w-64 shrink-0 bg-bg-card border-r border-white/5 fixed left-0 top-0 bottom-0 z-40"
+      style="padding-bottom: 100px;">
+      <div class="p-6">
+        <h1 class="text-xl font-bold tracking-tight" style="color: #1DB954;">🎵 C1 PULSE</h1>
+        <p class="text-xs text-text-muted mt-1">Изучай английский через музыку</p>
+      </div>
+
+      <nav class="px-3 flex-1">
+        <button onclick="switchView('library')"
+          class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:text-white hover:bg-white/5 transition"
+          data-view="library">
+          🏠 <span>Все песни</span>
+        </button>
+        <button onclick="switchView('dictionary')"
+          class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:text-white hover:bg-white/5 transition"
+          data-view="dictionary">
+          📚 <span>Словарь</span>
+        </button>
+        <button onclick="switchView('repeat')"
+          class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:text-white hover:bg-white/5 transition"
+          data-view="repeat">
+          🎯 <span>Повторение</span>
+        </button>
+      </nav>
+
+      <!-- Плейлисты в сайдбаре -->
+      <div class="px-4 pb-4 border-t border-white/5 pt-4">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-bold uppercase tracking-wider text-text-muted">Плейлисты</span>
+          <button onclick="openCreatePlaylistModal()"
+            class="text-text-muted hover:text-white transition text-lg leading-none">+</button>
+        </div>
+        <div id="sidebarPlaylist" class="space-y-0.5 max-h-48 overflow-y-auto"></div>
+      </div>
+    </aside>
+
+    <!-- Основной контент -->
+    <main class="flex-1 lg:ml-64 p-4 md:p-8 max-w-7xl mx-auto w-full">
+
+      <!-- ==================== БИБЛИОТЕКА ==================== -->
+      <div id="view-library" class="view-panel active animate-fade">
+        <!-- Заголовок -->
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <h2 class="text-3xl md:text-4xl font-bold">Моя библиотека</h2>
+          <button onclick="openAddSongModal()" class="btn-green text-sm">➕ Добавить песню</button>
+        </div>
+
+        <!-- Поиск и фильтры -->
+        <div class="flex flex-wrap gap-3 mb-6">
+          <div class="flex-1 min-w-[200px]">
+            <input type="text" id="searchInput" placeholder="Поиск по названию, исполнителю..." class="input-dark"
+              oninput="filterSongs()" />
+          </div>
+          <div class="flex gap-2">
+            <button onclick="setFilter('all')" class="filter-btn btn-outline text-xs bg-white/10 border-white/30"
+              data-filter="all">Все</button>
+            <button onclick="setFilter('recent')" class="filter-btn btn-outline text-xs"
+              data-filter="recent">Недавние</button>
+            <button onclick="setFilter('popular')" class="filter-btn btn-outline text-xs"
+              data-filter="popular">Популярные</button>
+          </div>
+        </div>
+
+        <!-- Сетка песен -->
+        <div id="songGrid" class="song-grid grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+        <p id="emptyLibrary" class="text-text-muted text-center py-16 hidden">
+          <span class="text-5xl block mb-4">🎵</span>
+          Библиотека пуста — добавь свою первую песню!
+        </p>
+      </div>
+
+      <!-- ==================== КАРАОКЕ ==================== -->
+      <div id="view-karaoke" class="view-panel">
+        <div class="flex items-center gap-4 mb-6">
+          <button onclick="switchView('library')" class="btn-outline text-sm">← Назад</button>
+          <div>
+            <h2 id="karaokeTitle" class="text-2xl font-bold">Караоке</h2>
+            <p id="karaokeArtist" class="text-text-secondary text-sm"></p>
+          </div>
+          <div class="ml-auto flex gap-2">
+            <button onclick="karaokePrevLine()" class="btn-outline">⏮</button>
+            <button onclick="karaokeTogglePlay()" id="karaokePlayBtn" class="btn-green text-sm px-6">▶ Play</button>
+            <button onclick="karaokeNextLine()" class="btn-outline">⏭</button>
+          </div>
+        </div>
+
+        <!-- Караоке-дисплей -->
+        <div id="karaokeArea" class="flex flex-col items-center justify-center min-h-[60vh] py-12">
+          <div id="karaokePrevLine"
+            class="karaoke-line text-lg md:text-xl text-text-secondary mb-4 text-center min-h-[2rem]"></div>
+          <div id="karaokeCurrLine"
+            class="karaoke-line active text-3xl md:text-5xl font-bold text-center leading-relaxed px-4 min-h-[4rem]">
+            <span class="text-text-muted">Выбери песню для караоке</span>
+          </div>
+          <div id="karaokeNextLine"
+            class="karaoke-line text-sm md:text-base text-text-muted mt-4 text-center min-h-[1.5rem]"></div>
+        </div>
+
+        <!-- Прогресс караоке -->
+        <div class="mt-6">
+          <div id="karaokeProgressBar" class="h-1 rounded-full bg-bg-elevated cursor-pointer"
+            onclick="karaokeSeek(event)">
+            <div id="karaokeProgressFill" class="h-full rounded-full transition-all"
+              style="width: 0%; background: #1DB954;"></div>
+          </div>
+          <div class="flex justify-between mt-1">
+            <span id="karaokeTime" class="text-xs text-text-muted">0:00</span>
+            <span id="karaokeDuration" class="text-xs text-text-muted">0:00</span>
+          </div>
+        </div>
+
+        <!-- AI анализ строки -->
+        <div class="mt-8 glass rounded-xl p-5 bg-white/5 border border-white/5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-semibold text-text-secondary">🤖 AI-разбор строки</h3>
+            <button onclick="karaokeAnalyzeLine()" class="btn-outline text-xs">✨ Разобрать</button>
+          </div>
+          <div id="karaokeAiResult" class="text-sm text-text-secondary whitespace-pre-wrap min-h-[40px]"></div>
+        </div>
+      </div>
+
+      <!-- ==================== СЛОВАРЬ ==================== -->
+      <div id="view-dictionary" class="view-panel animate-fade">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <h2 class="text-3xl font-bold">📚 Словарь</h2>
+          <div class="flex gap-2">
+            <button onclick="startRepeatMode()" class="btn-green text-sm">🎯 Повторять</button>
+            <button onclick="exportDictionary()" class="btn-outline text-sm">📥 Экспорт</button>
+          </div>
+        </div>
+
+        <!-- Статистика -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+          <div class="bg-bg-card rounded-xl p-4 border border-white/5">
+            <p class="text-xs text-text-muted uppercase">Всего слов</p>
+            <p id="dictTotal" class="text-2xl font-bold mt-1" style="color: #1DB954;">0</p>
+          </div>
+          <div class="bg-bg-card rounded-xl p-4 border border-white/5">
+            <p class="text-xs text-text-muted uppercase">На повторении</p>
+            <p id="dictDue" class="text-2xl font-bold mt-1 text-accent-cyan">0</p>
+          </div>
+          <div class="bg-bg-card rounded-xl p-4 border border-white/5">
+            <p class="text-xs text-text-muted uppercase">Выучено</p>
+            <p id="dictLearned" class="text-2xl font-bold mt-1 text-amber-400">0</p>
+          </div>
+          <div class="bg-bg-card rounded-xl p-4 border border-white/5">
+            <p class="text-xs text-text-muted uppercase">Уровень</p>
+            <p id="dictLevel" class="text-2xl font-bold mt-1">B1+</p>
+          </div>
+        </div>
+
+        <!-- Список слов -->
+        <div id="dictList" class="space-y-2"></div>
+        <p id="emptyDict" class="text-text-muted text-center py-16 hidden">
+          <span class="text-5xl block mb-4">📚</span>
+          Словарь пуст — кликай на слова в караоке для добавления
+        </p>
+      </div>
+
+      <!-- ==================== ПОВТОРЕНИЕ ==================== -->
+      <div id="view-repeat" class="view-panel animate-fade">
+        <div class="flex items-center gap-4 mb-8">
+          <button onclick="switchView('dictionary')" class="btn-outline text-sm">← Назад</button>
+          <h2 class="text-3xl font-bold">🎯 Повторение слов</h2>
+        </div>
+
+        <div id="repeatArea" class="max-w-xl mx-auto">
+          <div id="repeatStats" class="text-center mb-6">
+            <p class="text-text-secondary">Осталось повторить: <strong id="repeatCount" class="text-white">0</strong>
+            </p>
+            <p class="text-text-muted text-sm mt-1">Интервальное повторение по кривой Эббингауза</p>
+          </div>
+
+          <div id="flashcardArea" class="flashcard hidden" onclick="flipCard()">
+            <div id="cardFront">
+              <p class="text-4xl font-bold mb-4" id="cardWord">—</p>
+              <p class="text-text-muted text-sm">Нажми, чтобы увидеть перевод</p>
+            </div>
+            <div id="cardBack" class="hidden">
+              <p class="text-2xl font-bold mb-4" style="color: #1DB954;" id="cardTranslation">—</p>
+              <p class="text-text-secondary text-sm mb-2" id="cardSong">из песни: —</p>
+              <div class="flex justify-center gap-3 mt-6">
+                <button onclick="event.stopPropagation(); repeatAnswer(false)"
+                  class="btn-outline text-sm bg-red-500/10 border-red-500/30 text-red-300">😕 Не знал</button>
+                <button onclick="event.stopPropagation(); repeatAnswer(true)" class="btn-green text-sm">😎
+                  Знал!</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="repeatDone" class="text-center py-12 hidden">
+            <p class="text-5xl mb-4">🎉</p>
+            <p class="text-xl font-bold mb-2">Все слова повторены!</p>
+            <p class="text-text-secondary">Возвращайся завтра для следующего повторения</p>
+            <p class="text-accent-green font-bold mt-2">+10 XP</p>
+          </div>
+        </div>
+      </div>
+
+
+
+    </main>
+  </div>
+
+  <!-- ====== FIX PLAYER BAR ====== -->
+  <div id="player-bar" class="fixed bottom-0 left-0 right-0 z-50 px-3 py-2" style="display:none;">
+    <div class="flex items-center gap-4 max-w-screen-xl mx-auto">
+      <!-- Инфо о треке (клик → полный экран) -->
+      <div class="flex items-center gap-3 w-56 shrink-0 cursor-pointer hover:opacity-80 transition"
+        onclick="openFullPlayer()" title="Открыть полноэкранный плеер">
+        <div id="playerCover" class="w-14 h-14 rounded bg-bg-elevated overflow-hidden shrink-0">
+          <img id="playerCoverImg" src="" alt="" class="w-full h-full object-cover hidden" />
+        </div>
+        <div class="min-w-0">
+          <p id="playerTitle" class="text-sm font-semibold text-white truncate">—</p>
+          <p id="playerArtist" class="text-xs text-text-secondary truncate">—</p>
+        </div>
+      </div>
+
+      <!-- Контролы -->
+      <div class="flex-1 flex flex-col items-center gap-1 min-w-0">
+        <div class="flex items-center gap-4">
+          <button onclick="toggleShuffle()" id="btnShuffle" class="text-text-muted hover:text-white transition text-sm"
+            title="Shuffle">🔀</button>
+          <button onclick="toggleRepeat()" id="btnRepeat" class="text-text-muted hover:text-white transition text-sm"
+            title="Repeat">🔂</button>
+          <button onclick="playPrev()" class="text-text-secondary hover:text-white transition"
+            title="Предыдущий">⏮</button>
+          <button onclick="togglePlay()" id="btnPlayPause"
+            class="w-9 h-9 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition text-sm"
+            title="Play/Pause">▶</button>
+          <button onclick="playNext()" class="text-text-secondary hover:text-white transition"
+            title="Следующий">⏭</button>
+        </div>
+        <div class="flex items-center gap-2 w-full max-w-lg">
+          <span id="playerTime" class="text-xs text-text-muted w-10 text-right shrink-0">0:00</span>
+          <div id="playerProgress" class="flex-1 h-1 rounded-full bg-bg-elevated cursor-pointer group relative"
+            onclick="seekPlayer(event)">
+            <div id="playerProgressFill" class="h-full rounded-full bg-white group-hover:bg-accent-green transition-all"
+              style="width: 0%;"></div>
+            <div
+              class="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white opacity-0 group-hover:opacity-100 transition-opacity"
+              style="left: 0%; transform: translate(-50%, -50%);" id="playerProgressThumb"></div>
+          </div>
+          <span id="playerDuration" class="text-xs text-text-muted w-10 shrink-0">0:00</span>
+        </div>
+      </div>
+
+      <!-- Громкость + караоке -->
+      <div class="flex items-center gap-3 w-44 shrink-0">
+        <button onclick="openKaraokeForCurrent()" class="text-text-muted hover:text-white transition text-sm"
+          title="Караоке">🎤</button>
+        <button onclick="toggleQueue()" class="text-text-muted hover:text-white transition text-sm"
+          title="Очередь">☰</button>
+        <div class="player-volume-wrap flex items-center gap-2">
+          <button onclick="toggleMute()" id="btnVolume"
+            class="text-text-muted hover:text-white transition text-sm">🔊</button>
+          <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8" class="w-20 accent-white"
+            oninput="setVolume(this.value)" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== SIDEBAR: ОЧЕРЕДЬ ====== -->
+  <div id="queueSidebar"
+    style="position:fixed;top:0;right:0;width:320px;height:100vh;background:#121212;border-left:1px solid rgba(255,255,255,0.06);z-index:80;transform:translateX(100%);transition:transform 0.3s ease;overflow-y:auto;">
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold">Очередь</h3>
+        <button onclick="toggleQueue()" class="text-text-muted hover:text-white text-xl">&times;</button>
+      </div>
+      <div id="queueList" class="space-y-1"></div>
+    </div>
+  </div>
+
+  <!-- ====== МОДАЛКА: ДОБАВИТЬ ПЕСНЮ ====== -->
+  <div id="modalAddSong" class="modal-overlay" onclick="closeModalIfBg('modalAddSong')">
+    <div class="modal-content">
+      <h3 class="text-xl font-bold mb-6">➕ Добавить песню</h3>
+      <div class="space-y-4">
+        <div>
+          <label>Название песни *</label>
+          <input type="text" id="addSongTitle" class="input-dark mt-1" placeholder="Song title" />
+        </div>
+        <div>
+          <label>Исполнитель *</label>
+          <input type="text" id="addSongArtist" class="input-dark mt-1" placeholder="Artist name" />
+        </div>
+        <div>
+          <label>Альбом</label>
+          <input type="text" id="addSongAlbum" class="input-dark mt-1" placeholder="Album name (optional)" />
+        </div>
+        <div>
+          <label>Обложка</label>
+          <input type="file" id="addSongCover" accept="image/*" class="text-sm mt-1 text-text-secondary" />
+          <div id="addSongCoverPreview" class="mt-2"></div>
+        </div>
+        <div>
+          <label>MP3 файлы * (можно выбрать несколько)</label>
+          <input type="file" id="addSongMp3" accept="audio/mpeg,audio/mp3" multiple
+            class="text-sm mt-1 text-text-secondary" onchange="parseMp3Tags(this)" />
+          <span id="addSongCountLabel" class="text-xs text-accent-green ml-2"></span>
+        </div>
+        <div>
+          <label>LRC файл / JSON (синхронизация)</label>
+          <input type="file" id="addSongLrc" accept=".lrc,.txt,.json" class="text-sm mt-1 text-text-secondary mb-2" />
+          <textarea id="addSongLrcText" rows="4" class="input-dark mt-1 font-mono text-xs"
+            placeholder="Или вставь LRC / JSON сюда&#10;[00:00.00] Line 1&#10;или { &quot;syncedLyrics&quot;: &quot;...&quot; }"></textarea>
+          <div id="lrcFetchStatus" class="text-xs text-text-muted mt-1 min-h-[1.2rem]"></div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-3 mt-6">
+        <button onclick="closeModal('modalAddSong')" class="btn-outline">Отмена</button>
+        <button onclick="submitAddSong()" class="btn-green">Добавить</button>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- ====== МОДАЛКА: AI АНАЛИЗ ПЕСНИ ====== -->
+  <div id="modalAiAnalysis" class="modal-overlay" onclick="closeModalIfBg('modalAiAnalysis')">
+    <div class="modal-content" style="max-width: 640px;">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-bold">🧠 AI-разбор песни</h3>
+        <button onclick="closeModal('modalAiAnalysis')"
+          class="text-text-muted hover:text-white text-2xl">&times;</button>
+      </div>
+      <div id="aiAnalysisContent"
+        class="text-sm text-text-secondary whitespace-pre-wrap leading-relaxed max-h-[60vh] overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <!-- ====== POPUP: СЛОВО В КАРАОКЕ ====== -->
+  <div id="wordPopup">
+    <p id="wordPopupWord" class="text-lg font-bold mb-1" style="color: #1DB954;">—</p>
+    <p id="wordPopupTranscription" class="text-sm text-text-muted mb-3"></p>
+    <div class="flex flex-wrap gap-2">
+      <button onclick="wordPopupAddToDict()"
+        class="btn-outline text-xs bg-accent-green/10 border-accent-green/30 text-accent-green">➕ В словарь</button>
+      <button onclick="wordPopupSpeak()" class="btn-outline text-xs">🔊 Озвучить</button>
+      <button onclick="wordPopupExplain()" class="btn-outline text-xs">🤖 Объяснить</button>
+    </div>
+    <div id="wordPopupExplainResult" class="mt-3 text-xs text-text-secondary whitespace-pre-wrap hidden"></div>
+  </div>
+
+  <!-- ====== ПОЛНОЭКРАННЫЙ ПЛЕЕР ====== -->
+  <div id="fullPlayerOverlay">
+    <button onclick="closeFullPlayer()"
+      class="absolute top-6 left-6 text-white/60 hover:text-white transition text-2xl z-10">✕</button>
+    <div
+      class="flex flex-col lg:flex-row items-center justify-center w-full h-full max-w-7xl mx-auto px-6 gap-8 lg:gap-16">
+      <div class="shrink-0 text-center">
+        <div id="fullPlayerCoverLarge" class="w-56 h-56 md:w-72 md:h-72 rounded-xl overflow-hidden shadow-2xl mx-auto">
+          <div id="fullPlayerCoverPlaceholderLarge"
+            class="w-full h-full bg-white/5 flex items-center justify-center text-7xl opacity-20">🎵</div>
+          <img id="fullPlayerCoverImgLarge" src="" alt="" class="w-full h-full object-cover hidden" />
+        </div>
+        <div class="mt-4">
+          <h2 id="fullPlayerTitleLarge" class="text-lg md:text-xl font-bold text-white">—</h2>
+          <p id="fullPlayerArtistLarge" class="text-sm text-white/50 mt-1">—</p>
+        </div>
+      </div>
+      <div id="fullPlayerLyricsArea" class="flex-1 max-w-2xl w-full text-center lg:text-left overflow-y-auto py-8">
+        <p id="fpKaraokePrev" class="text-lg md:text-xl text-white/20 mb-4 transition-all duration-500 min-h-[2rem]">
+        </p>
+        <p id="fpKaraokeCurr"
+          class="text-2xl md:text-4xl font-bold leading-relaxed transition-all duration-500 text-white min-h-[3rem]">
+        </p>
+        <p id="fpKaraokeNext"
+          class="text-sm md:text-base text-white/15 mt-4 transition-all duration-500 min-h-[1.5rem]"></p>
+      </div>
+    </div>
+    <div class="w-full max-w-lg mx-auto px-6 mt-4">
+      <div id="fullPlayerProgress" class="h-1 rounded-full bg-white/10 cursor-pointer group relative"
+        onclick="seekFullPlayer(event)">
+        <div id="fullPlayerProgressFill" class="h-full rounded-full bg-white transition-all duration-150"
+          style="width:0%;"></div>
+      </div>
+      <div class="flex justify-between mt-1">
+        <span id="fullPlayerTime" class="text-xs text-white/40">0:00</span>
+        <span id="fullPlayerDuration" class="text-xs text-white/40">0:00</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-6 mt-3">
+      <button onclick="toggleRepeat()" id="fullBtnRepeat"
+        class="text-white/40 hover:text-white transition text-xl">🔂</button>
+      <button onclick="playPrev()" class="text-white/60 hover:text-white transition text-2xl">⏮</button>
+      <button onclick="togglePlay()" id="fullBtnPlayPause"
+        class="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition text-xl">▶</button>
+      <button onclick="playNext()" class="text-white/60 hover:text-white transition text-2xl">⏭</button>
+      <button onclick="toggleShuffle()" id="fullBtnShuffle"
+        class="text-white/40 hover:text-white transition text-xl">🔀</button>
+    </div>
+    <div class="flex items-center gap-3 mt-2">
+      <button onclick="toggleMute()" id="fullBtnVolume" class="text-white/40 hover:text-white transition">🔊</button>
+      <input type="range" id="fullVolumeSlider" min="0" max="1" step="0.01" value="0.8" class="w-24 accent-white"
+        oninput="setVolume(this.value)" />
+    </div>
+  </div>
+
+  <!-- ====== СКРИПТЫ ====== -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+  <script src="js/ollama.js"></script>
+  <script src="js/music.js"></script>
+  <script src="js/karaoke.js"></script>
+  <script src="js/dictionary.js"></script>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // =============================================
+      // ГЛОБАЛЬНОЕ СОСТОЯНИЕ
+      // =============================================
+      const state = {
+        songs: [],          // Метаданные песен (без mp3)
+        queue: [],          // Очередь воспроизведения
+        currentSongIdx: -1, // Индекс в queue
+        isPlaying: false,
+        isShuffle: false,
+        repeatMode: 'none', // none | one | all
+        volume: 0.8,
+        isMuted: false,
+        currentView: 'library',
+        currentFilter: 'all',
+        karaokeSongId: null,
+        karaokeParsed: [],
+        karaokeLineIdx: -1
+      };
+
+      const audio = new Audio();
+      audio.volume = state.volume;
+
+      // =============================================
+      // УТИЛИТЫ
+      // =============================================
+      function $(id) { return document.getElementById(id); }
+      function formatTime(s) {
+        if (isNaN(s) || !isFinite(s)) return '0:00';
+        const m = Math.floor(s / 60);
+        const sec = Math.floor(s % 60);
+        return m + ':' + (sec < 10 ? '0' : '') + sec;
+      }
+      function escHtml(s) {
+        const d = document.createElement('div');
+        d.textContent = s || '';
+        return d.innerHTML;
+      }
+      function showToast(msg, duration) {
+        duration = duration || 2500;
+        const t = $('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), duration);
+      }
+
+      // =============================================
+      // НАВИГАЦИЯ
+      // =============================================
+      window.switchView = function (view) {
+        state.currentView = view;
+        document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+        const panel = $('view-' + view);
+        if (panel) { panel.classList.add('active'); }
+
+        // Навигация
+        document.querySelectorAll('.nav-btn').forEach(b => {
+          b.classList.toggle('text-white', b.getAttribute('data-view') === view);
+          b.classList.toggle('bg-white/10', b.getAttribute('data-view') === view);
+          b.classList.toggle('text-text-secondary', b.getAttribute('data-view') !== view);
+          b.classList.remove('bg-white/5');
+        });
+
+        if (view === 'library') { renderLibrary(); renderSidebarAlbums(); }
+        if (view === 'dictionary') { renderDictionary(); updateDictStats(); }
+      };
+
+      // =============================================
+      // МОДАЛКИ
+      // =============================================
+      window.openAddSongModal = function () { $('modalAddSong').classList.add('show'); };
+      window.openCreatePlaylistModal = function () { $('modalCreatePlaylist').classList.add('show'); };
+      window.closeModal = function (id) { $(id).classList.remove('show'); };
+      window.closeModalIfBg = function (id) { if (event.target === $(id)) closeModal(id); };
+
+      // =============================================
+      // ДОБАВИТЬ ПЕСНЮ (поддержка нескольких файлов)
+      // =============================================
+      window.submitAddSong = async function () {
+        var mp3Files = $('addSongMp3').files;
+        if (!mp3Files || !mp3Files.length) return showToast('Выбери MP3 файл');
+
+        var lrcFile = $('addSongLrc').files[0];
+        var lrcText = $('addSongLrcText').value.trim();
+
+        // Проверка на дубликаты
+        var existingMap = {};
+        state.songs.forEach(function (s) {
+          var key = (s.title || '').toLowerCase() + '|||' + (s.artist || '').toLowerCase();
+          existingMap[key] = true;
+        });
+
+        var added = 0;
+        var errors = 0;
+        var total = mp3Files.length;
+
+        // Показываем прогресс
+        showToast('Загружаю ' + total + ' файл(ов)…');
+        var statusEl = $('lrcFetchStatus');
+        if (statusEl) statusEl.textContent = '⏳ Ищу тексты песен на lrclib.net...';
+        if (statusEl) statusEl.style.color = '#38bdf8';
+
+        for (var i = 0; i < total; i++) {
+          var mp3File = mp3Files[i];
+
+          try {
+            // Читаем теги из каждого файла отдельно
+            var tags = await readTagsFromFile(mp3File);
+
+            var title = tags.title || $('addSongTitle').value.trim();
+            var artist = tags.artist || $('addSongArtist').value.trim();
+            var album = tags.album || $('addSongAlbum').value.trim();
+            var coverBlob = tags.coverBlob || window._pendingCoverBlob || null;
+
+            // Если имя не найдено — fallback на имя файла
+            if (!title) title = mp3File.name.replace(/\.[^.]+$/, '');
+            if (!artist) artist = 'Неизвестный';
+
+            // Проверка на дубликат
+            var dupKey = title.toLowerCase() + '|||' + artist.toLowerCase();
+            if (existingMap[dupKey]) {
+              console.log('[LRC] Пропускаем дубликат:', title, '-', artist);
+              errors++;
+              if (statusEl) {
+                statusEl.textContent = '⏭ Пропуск дубликата: ' + title;
+                statusEl.style.color = '#f59e0b';
+              }
+              continue;
+            }
+            existingMap[dupKey] = true; // Чтобы внутри одного батча тоже не дублировалось
+
+            // Загружаем LRC с lrclib.net (если нет из тегов и не вставлен вручную)
+            var songLrc = tags.lrc || (i === 0 ? lrcText : '');
+            if (!songLrc) {
+              songLrc = await fetchLrcFromApi(artist, title);
+            }
+
+            console.log('Adding song:', title, artist, '| LRC:', songLrc ? 'найдено (' + songLrc.length + ' chars)' : 'нет');
+
+            if (statusEl) {
+              if (songLrc) {
+                statusEl.textContent = '✅ LRC найден: ' + title + ' — ' + artist;
+                statusEl.style.color = '#1DB954';
+              } else {
+                statusEl.textContent = '⚠️ LRC не найден для «' + title + '» — проверь название в консоли (F12)';
+                statusEl.style.color = '#f59e0b';
+              }
+            }
+
+            await window.musicAddSong({
+              title: title,
+              artist: artist,
+              album: album,
+              mp3Blob: mp3File,
+              lrc: songLrc,
+              coverBlob: coverBlob,
+              playCount: 0,
+              addedAt: Date.now()
+            });
+
+            added++;
+          } catch (e) {
+            console.error('Ошибка добавления ' + mp3File.name, e);
+            errors++;
+          }
+        }
+
+        // Очистить форму
+        ['addSongTitle', 'addSongArtist', 'addSongAlbum'].forEach(function (x) { $(x).value = ''; });
+        ['addSongMp3', 'addSongLrc', 'addSongCover'].forEach(function (x) { $(x).value = ''; });
+        $('addSongLrcText').value = '';
+        $('addSongCoverPreview').innerHTML = '';
+        var stEl = $('lrcFetchStatus');
+        if (stEl) stEl.textContent = '';
+        window._pendingCoverBlob = null;
+
+        closeModal('modalAddSong');
+
+        if (errors > 0) {
+          showToast('✅ Добавлено: ' + added + ' | Ошибки: ' + errors, 4000);
+        } else {
+          showToast('🎵 Добавлено ' + added + ' песен!');
+        }
+
+        renderLibrary();
+        renderSidebarAlbums();
+      };
+
+      /** Прочитать ID3 теги из одного MP3 файла */
+      function readTagsFromFile(file) {
+        return new Promise(function (resolve) {
+          if (typeof jsmediatags === 'undefined') {
+            resolve({});
+            return;
+          }
+
+          jsmediatags.read(file, {
+            onSuccess: function (tag) {
+              var t = tag.tags || {};
+              var result = {
+                title: t.title || '',
+                artist: t.artist || '',
+                album: t.album || '',
+                coverBlob: null,
+                lrc: ''
+              };
+
+              // Обложка
+              if (t.picture) {
+                try {
+                  var pic = t.picture;
+                  var byteArr = new Uint8Array(pic.data);
+                  result.coverBlob = new Blob([byteArr], { type: pic.format });
+                } catch (e) { }
+              }
+
+              // Текст из тегов
+              if (t.lyrics) {
+                var lyricsText = typeof t.lyrics === 'string' ? t.lyrics : (t.lyrics.lyrics || '');
+                if (lyricsText && /\[\d{1,2}:\d{2}/.test(lyricsText)) {
+                  result.lrc = lyricsText;
+                }
+              }
+
+              resolve(result);
+            },
+            onError: function () {
+              resolve({});
+            }
+          });
+        });
+      }
+
+      /** Загрузить LRC с lrclib.net */
+      function fetchLrcFromApi(artist, trackName) {
+        return new Promise(function (resolve) {
+          if (!artist || !trackName) {
+            console.log('[LRC] Нет artist/title, пропускаем');
+            resolve(''); return;
+          }
+
+          // Пробуем несколько вариантов поиска
+          var queries = [];
+
+          // 1. Точный запрос
+          queries.push('https://lrclib.net/api/get?artist_name=' +
+            encodeURIComponent(artist) + '&track_name=' + encodeURIComponent(trackName));
+
+          // 2. Очистим название: убираем спецсимволы
+          var cleanTrack = trackName.replace(/[^a-zA-Z0-9а-яА-Я ]/g, '').trim();
+          if (cleanTrack && cleanTrack !== trackName) {
+            queries.push('https://lrclib.net/api/get?artist_name=' +
+              encodeURIComponent(artist) + '&track_name=' + encodeURIComponent(cleanTrack));
+          }
+
+          // 3. Через поиск
+          queries.push('https://lrclib.net/api/search?q=' +
+            encodeURIComponent(artist + ' ' + trackName));
+
+          tryNextQuery(queries, 0, resolve);
+        });
+      }
+
+      function tryNextQuery(queries, index, resolve) {
+        if (index >= queries.length) {
+          console.log('[LRC] Все запросы исчерпаны, ничего не найдено');
+          resolve('');
+          return;
+        }
+
+        var url = queries[index];
+        console.log('[LRC] Запрос #' + (index + 1) + ':', url);
+
+        fetch(url)
+          .then(function (res) {
+            if (!res.ok) {
+              console.log('[LRC] Ответ', res.status, res.statusText);
+              return null;
+            }
+            return res.json();
+          })
+          .then(function (data) {
+            if (!data) {
+              // Пробуем следующий запрос
+              tryNextQuery(queries, index + 1, resolve);
+              return;
+            }
+
+            // Если это результат get — один объект
+            if (data.syncedLyrics) {
+              console.log('[LRC] ✅ Найдено syncedLyrics:', data.trackName, '-', data.artistName);
+              resolve(data.syncedLyrics);
+              return;
+            }
+            if (data.plainLyrics) {
+              console.log('[LRC] ✅ Найдено plainLyrics:', data.trackName, '-', data.artistName);
+              resolve(data.plainLyrics);
+              return;
+            }
+
+            // Если это результат search — массив
+            if (Array.isArray(data) && data.length > 0) {
+              var best = data[0];
+              console.log('[LRC] ✅ Найдено через поиск:', best.trackName, '-', best.artistName);
+              // У search нет syncedLyrics в ответе, нужно делать отдельный get
+              fetch('https://lrclib.net/api/get/' + best.id)
+                .then(function (r) { return r.json(); })
+                .then(function (detail) {
+                  if (detail.syncedLyrics) resolve(detail.syncedLyrics);
+                  else if (detail.plainLyrics) resolve(detail.plainLyrics);
+                  else tryNextQuery(queries, index + 1, resolve);
+                })
+                .catch(function () {
+                  tryNextQuery(queries, index + 1, resolve);
+                });
+              return;
+            }
+
+            // Ничего не нашли — следующий запрос
+            console.log('[LRC] Пустой ответ, пробуем дальше...');
+            tryNextQuery(queries, index + 1, resolve);
+          })
+          .catch(function (e) {
+            console.log('[LRC] Ошибка fetch:', e.message);
+            tryNextQuery(queries, index + 1, resolve);
+          });
+      }
+
+      // =============================================
+      // АВТО-ПАРСИНГ ID3 ТЕГОВ ИЗ MP3
+      // =============================================
+      window.parseMp3Tags = function (input) {
+        var files = input.files;
+        if (!files || !files.length) return;
+
+        // Показываем сколько файлов выбрано
+        var countLabel = $('addSongCountLabel');
+        if (countLabel) {
+          countLabel.textContent = files.length > 1 ? 'Выбрано файлов: ' + files.length : '';
+        }
+
+        // Читаем теги только первого файла (как fallback для формы)
+        var file = files[0];
+        if (typeof jsmediatags === 'undefined') {
+          console.warn('jsmediatags не загружен');
+          return;
+        }
+
+        jsmediatags.read(file, {
+          onSuccess: function (tag) {
+            var t = tag.tags || {};
+
+            // Название
+            if (t.title && !$('addSongTitle').value) {
+              $('addSongTitle').value = t.title;
+            }
+
+            // Исполнитель
+            if (t.artist && !$('addSongArtist').value) {
+              $('addSongArtist').value = t.artist;
+            }
+
+            // Альбом
+            if (t.album && !$('addSongAlbum').value) {
+              $('addSongAlbum').value = t.album;
+            }
+
+            // Обложка (picture.data — Uint8Array)
+            if (t.picture) {
+              var pic = t.picture;
+              var base64String = '';
+              var bytes = new Uint8Array(pic.data);
+              var len = bytes.byteLength;
+              for (var i = 0; i < len; i++) {
+                base64String += String.fromCharCode(bytes[i]);
+              }
+              var dataUrl = 'data:' + pic.format + ';base64,' + btoa(base64String);
+
+              // Показываем превью
+              var coverPreview = $('addSongCoverPreview');
+              if (coverPreview) {
+                coverPreview.innerHTML = '<img src="' + dataUrl + '" class="w-24 h-24 rounded-lg object-cover border border-white/10" />';
+              }
+
+              // Сохраняем blob для отправки
+              var byteArr = new Uint8Array(pic.data);
+              window._pendingCoverBlob = new Blob([byteArr], { type: pic.format });
+            }
+
+            // Текст песни (если есть в тегах — USLT фрейм)
+            if (t.lyrics) {
+              var lyricsText = typeof t.lyrics === 'string' ? t.lyrics : (t.lyrics.lyrics || '');
+              if (lyricsText && !$('addSongLrcText').value) {
+                // Проверяем, есть ли тайминги
+                if (/\[\d{1,2}:\d{2}/.test(lyricsText)) {
+                  $('addSongLrcText').value = lyricsText;
+                }
+                // Иначе просто текст — пользователь может вставить LRC сам
+              }
+            }
+
+            showToast('📋 Теги MP3 распознаны: ' + (t.title || 'без названия'));
+          },
+          onError: function (error) {
+            console.log('Не удалось прочитать теги:', error.type, error.info);
+          }
+        });
+      };
+
+      function readFileAsText(file) {
+        return new Promise((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result);
+          r.onerror = reject;
+          r.readAsText(file);
+        });
+      }
+
+      // =============================================
+      // РЕНДЕР БИБЛИОТЕКИ
+      // =============================================
+      window.renderLibrary = async function () {
+        try {
+          state.songs = await window.musicListSongs();
+        } catch (e) { state.songs = []; }
+
+        filterSongs();
+        renderSidebarAlbums();
+      };
+
+      window.filterSongs = function () {
+        const search = ($('searchInput')?.value || '').toLowerCase();
+        let songs = state.songs.slice();
+
+        // Фильтр
+        if (state.currentFilter === 'recent') {
+          const weekAgo = Date.now() - 7 * 86400000;
+          songs = songs.filter(s => s.addedAt >= weekAgo);
+        } else if (state.currentFilter === 'popular') {
+          songs.sort((a, b) => (b.playCount || 0) - (a.playCount || 0));
+        }
+
+        // Поиск
+        if (search) {
+          songs = songs.filter(s =>
+            (s.title || '').toLowerCase().includes(search) ||
+            (s.artist || '').toLowerCase().includes(search) ||
+            (s.album || '').toLowerCase().includes(search)
+          );
+        }
+
+        renderSongGrid(songs);
+      };
+
+      window.setFilter = function (f) {
+        state.currentFilter = f;
+        document.querySelectorAll('.filter-btn').forEach(b => {
+          b.classList.toggle('bg-white/10', b.getAttribute('data-filter') === f);
+          b.classList.toggle('border-white/30', b.getAttribute('data-filter') === f);
+        });
+        filterSongs();
+      };
+
+      window.toggleSongMenu = function (btn, id) {
+        const menu = btn.nextElementSibling;
+        const wasHidden = menu.classList.contains('hidden');
+        document.querySelectorAll('.song-menu').forEach(m => m.classList.add('hidden'));
+        if (wasHidden) menu.classList.remove('hidden');
+      };
+
+      // Закрыть меню при клике вне
+      document.addEventListener('click', () => document.querySelectorAll('.song-menu').forEach(m => m.classList.add('hidden')));
+
+      // =============================================
+      // УДАЛИТЬ ПЕСНЮ
+      // =============================================
+      window.deleteSong = async function (id) {
+        if (!confirm('Удалить песню?')) return;
+        try {
+          await window.musicDeleteSong(id);
+          showToast('Песня удалена');
+          renderLibrary();
+          // Если эта песня играла — остановить
+          const song = state.songs.find(s => s.id === id);
+          if (song && state.queue.some(q => q.id === id)) {
+            audio.pause();
+            audio.src = '';
+            state.queue = state.queue.filter(q => q.id !== id);
+            state.isPlaying = false;
+            updatePlayerUI();
+          }
+        } catch (e) { showToast('Ошибка: ' + e.message, 3000); }
+      };
+
+      // =============================================
+      // ПЛЕЕР
+      // =============================================
+      function updatePlayerUI() {
+        const song = state.queue[state.currentSongIdx];
+        const bar = $('player-bar');
+        if (!song) { bar.style.display = 'none'; return; }
+        bar.style.display = 'flex';
+
+        $('playerTitle').textContent = song.title;
+        $('playerArtist').textContent = song.artist;
+        const img = $('playerCoverImg');
+        if (song.coverUrl) { img.src = song.coverUrl; img.classList.remove('hidden'); }
+        else { img.classList.add('hidden'); }
+
+        $('btnPlayPause').textContent = state.isPlaying ? '⏸' : '▶';
+
+        // Полноэкранный плеер
+        $('fullPlayerTitle').textContent = song.title;
+        $('fullPlayerArtist').textContent = song.artist;
+        const fImg = $('fullPlayerCoverImg');
+        const fPlace = $('fullPlayerCoverPlaceholder');
+        if (song.coverUrl) { fImg.src = song.coverUrl; fImg.classList.remove('hidden'); fPlace.classList.add('hidden'); }
+        else { fImg.classList.add('hidden'); fPlace.classList.remove('hidden'); }
+        $('fullBtnPlayPause').textContent = state.isPlaying ? '⏸' : '▶';
+      }
+
+      // Полноэкранный плеер
+      window.openFullPlayer = function () {
+        if (!state.queue[state.currentSongIdx]) return;
+        var song = state.queue[state.currentSongIdx];
+        updatePlayerUI();
+
+        // Устанавливаем фон под цвет обложки
+        if (song.coverUrl) {
+          setPlayerBackground(song.coverUrl);
+        } else {
+          $('fullPlayerOverlay').style.background = '';
+        }
+
+        // Проверяем есть ли LRC
+        var hasLrc = song.lrc && window.parseLrc(song.lrc).length > 0;
+
+        // Обновляем обложку и текст в новом дизайне
+        var coverLarge = $('fullPlayerCoverImgLarge');
+        var coverPlaceholder = $('fullPlayerCoverPlaceholderLarge');
+        if (song.coverUrl) {
+          coverLarge.src = song.coverUrl;
+          coverLarge.classList.remove('hidden');
+          coverPlaceholder.classList.add('hidden');
+        } else {
+          coverLarge.classList.add('hidden');
+          coverPlaceholder.classList.remove('hidden');
+        }
+        $('fullPlayerTitleLarge').textContent = song.title;
+        $('fullPlayerArtistLarge').textContent = song.artist;
+
+        if (hasLrc) {
+          _kLines = window.parseLrc(song.lrc);
+          _kSongId = song.id;
+          _kIdx = -1;
+          $('fullPlayerLyricsArea').style.display = '';
+        } else {
+          $('fullPlayerLyricsArea').style.display = 'none';
+        }
+
+        $('fullPlayerOverlay').classList.add('show');
+      };
+
+      /** Извлечь доминирующий цвет из обложки и применить как фон */
+      function setPlayerBackground(imgUrl) {
+        var img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = function () {
+          try {
+            var canvas = document.createElement('canvas');
+            canvas.width = 1;
+            canvas.height = 1;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, 1, 1);
+            var pixel = ctx.getImageData(0, 0, 1, 1).data;
+            var r = pixel[0], g = pixel[1], b = pixel[2];
+            // Затемняем цвет для фона
+            var factor = 0.35;
+            var bg = 'rgb(' + Math.round(r * factor) + ',' + Math.round(g * factor) + ',' + Math.round(b * factor) + ')';
+            $('fullPlayerOverlay').style.background = bg;
+          } catch (e) {
+            // CORS restriction — fallback
+            $('fullPlayerOverlay').style.background = '';
+          }
+        };
+        img.onerror = function () {
+          $('fullPlayerOverlay').style.background = '';
+        };
+        img.src = imgUrl;
+      }
+
+      window.closeFullPlayer = function () {
+        $('fullPlayerOverlay').classList.remove('show');
+      };
+
+      window.seekFullPlayer = function (e) {
+        if (!audio.duration) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+      };
+
+      window.playSongById = async function (id) {
+        const song = state.songs.find(s => s.id === id);
+        if (!song) return;
+        state.queue = state.songs.slice();
+        state.currentSongIdx = state.queue.findIndex(s => s.id === id);
+        state.isShuffle = false;
+        await loadAndPlay();
+      };
+
+      async function loadAndPlay() {
+        const song = state.queue[state.currentSongIdx];
+        if (!song) return;
+
+        try {
+          const mp3Buffer = await window.musicGetMp3(song.id);
+          if (!mp3Buffer) { showToast('MP3 не найден'); return; }
+
+          // Увеличить счётчик
+          try { await window.musicUpdatePlayCount(song.id); } catch (e) { }
+
+          const blob = new Blob([mp3Buffer]);
+          const url = URL.createObjectURL(blob);
+          audio.src = url;
+          audio.load();
+          audio.play();
+          state.isPlaying = true;
+          updatePlayerUI();
+          renderQueue();
+
+          // Караоке
+          if (song.lrc) {
+            _kLines = window.parseLrc(song.lrc);
+            _kSongId = song.id;
+            _kIdx = -1;
+          }
+        } catch (e) { console.error(e); showToast('Ошибка воспроизведения'); }
+      }
+
+      window.togglePlay = function () {
+        if (!audio.src) return;
+        if (state.isPlaying) { audio.pause(); state.isPlaying = false; }
+        else { audio.play(); state.isPlaying = true; }
+        updatePlayerUI();
+      };
+
+      window.playPrev = function () {
+        if (state.queue.length === 0) return;
+        if (audio.currentTime > 3) { audio.currentTime = 0; return; }
+        state.currentSongIdx = (state.currentSongIdx - 1 + state.queue.length) % state.queue.length;
+        loadAndPlay();
+      };
+
+      window.playNext = function () {
+        if (state.queue.length === 0) return;
+        if (state.isShuffle) {
+          state.currentSongIdx = Math.floor(Math.random() * state.queue.length);
+        } else {
+          state.currentSongIdx = (state.currentSongIdx + 1) % state.queue.length;
+        }
+        loadAndPlay();
+      };
+
+      window.seekPlayer = function (e) {
+        if (!audio.duration) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const pct = (e.clientX - rect.left) / rect.width;
+        audio.currentTime = pct * audio.duration;
+      };
+
+      window.setVolume = function (v) {
+        state.volume = parseFloat(v);
+        audio.volume = state.volume;
+        state.isMuted = state.volume === 0;
+        $('btnVolume').textContent = state.isMuted ? '🔇' : state.volume < 0.5 ? '🔉' : '🔊';
+      };
+
+      window.toggleMute = function () {
+        state.isMuted = !state.isMuted;
+        audio.volume = state.isMuted ? 0 : state.volume;
+        $('btnVolume').textContent = state.isMuted ? '🔇' : '🔊';
+        $('volumeSlider').value = state.isMuted ? 0 : state.volume;
+      };
+
+      window.toggleShuffle = function () {
+        state.isShuffle = !state.isShuffle;
+        $('btnShuffle').style.color = state.isShuffle ? '#1DB954' : '';
+        const fbs = $('fullBtnShuffle');
+        if (fbs) fbs.style.color = state.isShuffle ? '#1DB954' : '';
+      };
+
+      window.toggleRepeat = function () {
+        const modes = ['none', 'all', 'one'];
+        const idx = (modes.indexOf(state.repeatMode) + 1) % 3;
+        state.repeatMode = modes[idx];
+        const btn = $('btnRepeat');
+        btn.textContent = state.repeatMode === 'one' ? '🔁' : '🔂';
+        btn.style.color = state.repeatMode !== 'none' ? '#1DB954' : '';
+        const fbr = $('fullBtnRepeat');
+        if (fbr) { fbr.textContent = state.repeatMode === 'one' ? '🔁' : '🔂'; fbr.style.color = state.repeatMode !== 'none' ? '#1DB954' : ''; }
+      };
+
+      // Audio events
+      audio.addEventListener('timeupdate', function () {
+        if (!audio.duration) return;
+        const pct = (audio.currentTime / audio.duration) * 100;
+        $('playerProgressFill').style.width = pct + '%';
+        const thumb = $('playerProgressThumb');
+        if (thumb) thumb.style.left = pct + '%';
+        $('playerTime').textContent = formatTime(audio.currentTime);
+        $('playerDuration').textContent = formatTime(audio.duration);
+
+        // Полноэкранный прогресс
+        const fpFill = $('fullPlayerProgressFill');
+        if (fpFill) fpFill.style.width = pct + '%';
+        const fpTime = $('fullPlayerTime');
+        if (fpTime) fpTime.textContent = formatTime(audio.currentTime);
+        const fpDur = $('fullPlayerDuration');
+        if (fpDur) fpDur.textContent = formatTime(audio.duration);
+
+        // Караоке
+        updateKaraokeDisplay();
+      });
+
+      audio.addEventListener('ended', function () {
+        if (state.repeatMode === 'one') { audio.currentTime = 0; audio.play(); return; }
+        if (state.currentSongIdx < state.queue.length - 1 || state.repeatMode === 'all') {
+          playNext();
+        } else {
+          state.isPlaying = false;
+          updatePlayerUI();
+        }
+      });
+
+      audio.addEventListener('pause', () => { state.isPlaying = false; updatePlayerUI(); });
+      audio.addEventListener('play', () => { state.isPlaying = true; updatePlayerUI(); });
+
+      // =============================================
+      // ОЧЕРЕДЬ
+      // =============================================
+      window.toggleQueue = function () {
+        $('queueSidebar').classList.toggle('open');
+        renderQueue();
+      };
+
+      function renderQueue() {
+        const list = $('queueList');
+        if (!list) return;
+        list.innerHTML = state.queue.map((s, i) =>
+          '<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 cursor-pointer ' +
+          (i === state.currentSongIdx ? 'bg-white/10' : '') + '" onclick="playQueueIndex(' + i + ')">' +
+          '<span class="text-xs text-text-muted w-6 text-right">' + (i + 1) + '</span>' +
+          '<div class="min-w-0 flex-1">' +
+          '<p class="text-sm text-white truncate">' + escHtml(s.title) + '</p>' +
+          '<p class="text-xs text-text-secondary truncate">' + escHtml(s.artist) + '</p>' +
+          '</div>' +
+          '</div>'
+        ).join('');
+      }
+
+      window.playQueueIndex = function (i) {
+        state.currentSongIdx = i;
+        loadAndPlay();
+      };
+
+      // =============================================
+      // КАРАОКЕ
+      // =============================================
+      var _kLines = [];     // [{time, text}]
+      var _kIdx = -1;        // текущий индекс строки
+      var _kSongId = null;
+
+      window.openKaraoke = async function (songId) {
+        const song = state.songs.find(s => s.id === songId);
+        if (!song) return showToast('Песня не найдена');
+        if (!song.lrc) return showToast('Нет LRC/JSON для этой песни');
+
+        // Парсим LRC (поддержка JSON с syncedLyrics)
+        _kLines = window.parseLrc(song.lrc);
+        if (!_kLines.length) return showToast('Не удалось распарсить синхротекст');
+
+        _kSongId = songId;
+        _kIdx = -1;
+
+        $('karaokeTitle').textContent = song.title;
+        $('karaokeArtist').textContent = song.artist;
+        $('karaokeAiResult').textContent = '';
+
+        switchView('karaoke');
+
+        // Запускаем воспроизведение
+        await playSongById(songId);
+      };
+
+      window.openKaraokeForCurrent = function () {
+        if (!_kSongId) return showToast('Нет караоке для текущей песни');
+        switchView('karaoke');
+      };
+
+      /** Обновить отображение строк караоке — обновляет и view, и fullPlayer */
+      function updateKaraokeDisplay() {
+        if (!_kLines.length) return;
+
+        var t = audio.currentTime || 0;
+        var idx = -1;
+        for (var i = _kLines.length - 1; i >= 0; i--) {
+          if (t >= _kLines[i].time) { idx = i; break; }
+        }
+        if (idx < 0) idx = 0;
+        if (idx === _kIdx) return;
+        _kIdx = idx;
+
+        var entry = _kLines[idx];
+        var words = entry.text.split(/\s+/).filter(Boolean);
+        var wordsHtml = words.map(function (w) {
+          var clean = w.replace(/[^a-zA-Z'-]/g, '');
+          if (clean.length > 1) {
+            return '<span class="karaoke-word" data-word="' + escHtml(clean.toLowerCase()) + '">' + escHtml(w) + '</span>';
+          }
+          return escHtml(w);
+        }).join(' ');
+
+        // View: караоке
+        var c1 = $('karaokeCurrLine');
+        if (c1) c1.innerHTML = wordsHtml;
+        if (idx > 0) { var p1 = $('karaokePrevLine'); if (p1) { p1.textContent = _kLines[idx - 1].text; p1.style.display = ''; } }
+        else { var p1b = $('karaokePrevLine'); if (p1b) { p1b.textContent = ''; p1b.style.display = 'none'; } }
+        if (idx < _kLines.length - 1) { var n1 = $('karaokeNextLine'); if (n1) { n1.textContent = _kLines[idx + 1].text; n1.style.display = ''; } }
+        else { var n1b = $('karaokeNextLine'); if (n1b) { n1b.textContent = ''; n1b.style.display = 'none'; } }
+
+        // FullPlayer: караоке (если открыт)
+        var fp = $('fpKaraokeCurr');
+        if (fp && $('fullPlayerOverlay').classList.contains('show')) {
+          $('fpKaraokeCurr').innerHTML = wordsHtml;
+          if (idx > 0) { $('fpKaraokePrev').textContent = _kLines[idx - 1].text; }
+          else { $('fpKaraokePrev').textContent = ''; }
+          if (idx < _kLines.length - 1) { $('fpKaraokeNext').textContent = _kLines[idx + 1].text; }
+          else { $('fpKaraokeNext').textContent = ''; }
+        }
+
+        // Прогресс
+        var totalDuration = _kLines.length > 0 ? _kLines[_kLines.length - 1].time : 0;
+        if (totalDuration > 0) {
+          var pct = Math.min(100, (entry.time / totalDuration) * 100);
+          $('karaokeProgressFill').style.width = pct + '%';
+          $('karaokeTime').textContent = formatTime(entry.time);
+          $('karaokeDuration').textContent = formatTime(totalDuration);
+        }
+
+        // Обновляем прогресс в полноэкранном плеере
+        if (audio.duration && $('fullPlayerOverlay').classList.contains('show')) {
+          var fpPct = (audio.currentTime / audio.duration) * 100;
+          var fpFill = $('fullPlayerProgressFill');
+          if (fpFill) fpFill.style.width = fpPct + '%';
+          var fpTime = $('fullPlayerTime');
+          if (fpTime) fpTime.textContent = formatTime(audio.currentTime);
+          var fpDur = $('fullPlayerDuration');
+          if (fpDur) fpDur.textContent = formatTime(audio.duration);
+        }
+      }
+
+      window.karaokeTogglePlay = function () { togglePlay(); };
+
+      window.karaokePrevLine = function () {
+        if (_kIdx > 0) {
+          // Перемотать к времени предыдущей строки
+          audio.currentTime = _kLines[_kIdx - 1].time;
+        } else {
+          audio.currentTime = 0;
+        }
+      };
+
+      window.karaokeNextLine = function () {
+        if (_kIdx < _kLines.length - 1) {
+          audio.currentTime = _kLines[_kIdx + 1].time;
+        }
+      };
+
+      window.karaokeSeek = function (e) {
+        if (!audio.duration) return;
+        var rect = e.currentTarget.getBoundingClientRect();
+        audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+      };
+
+      window.karaokeAnalyzeLine = async function () {
+        if (_kIdx < 0 || _kIdx >= _kLines.length) return showToast('Нет активной строки');
+        var line = _kLines[_kIdx].text;
+        var result = $('karaokeAiResult');
+        result.textContent = '⏳ Разбираю…';
+        try {
+          var res = await window.ollamaExplainWord(line);
+          result.textContent = res;
+        } catch (e) { result.textContent = 'Ошибка: ' + e.message; }
+      };
+
+      // =============================================
+      // AI АНАЛИЗ ПЕСНИ
+      // =============================================
+      window.analyzeSong = async function (songId) {
+        $('modalAiAnalysis').classList.add('show');
+        const content = $('aiAnalysisContent');
+        content.textContent = '⏳ Ollama разбирает песню…';
+
+        try {
+          const song = await window.musicGetSong(songId);
+          if (!song || !song.lrc) { content.textContent = 'Нет LRC для анализа.'; return; }
+          const lyrics = window.lrcToLines(song.lrc).join('\n');
+          if (!lyrics.trim()) { content.textContent = 'LRC пустой.'; return; }
+          const result = await window.ollamaAnalyzeSong(lyrics);
+          content.textContent = result;
+        } catch (e) {
+          content.textContent = 'Ошибка: ' + e.message + '\nУбедись, что Ollama запущен на localhost:11434.';
+        }
+      };
+
+      // =============================================
+      // СЛОВАРЬ
+      // =============================================
+      window.renderDictionary = function () {
+        const dict = window.musicDictGet();
+        const list = $('dictList');
+        const empty = $('emptyDict');
+
+        if (!dict.length) { list.innerHTML = ''; empty.classList.remove('hidden'); return; }
+        empty.classList.add('hidden');
+
+        // Группировка по словам
+        const grouped = {};
+        dict.forEach(e => {
+          if (!grouped[e.word]) grouped[e.word] = [];
+          grouped[e.word].push(e);
+        });
+
+        list.innerHTML = Object.entries(grouped).map(([word, entries]) => {
+          const songNames = entries.map(e => e.songTitle).join(', ');
+          const date = new Date(entries[0].addedAt).toLocaleDateString('ru-RU');
+          const interval = entries[0].interval || 0;
+          const intervalLabels = ['Новое', '1 час', '1 день', '2 дня', '6 дней', '30 дней', 'Выучено'];
+          const levelLabel = intervalLabels[Math.min(interval, intervalLabels.length - 1)];
+
+          return '<div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-bg-card border border-white/5 hover:border-white/10 transition">' +
+            '<div class="flex-1 min-w-0">' +
+            '<p class="text-sm font-semibold text-white truncate">' + escHtml(word) + '</p>' +
+            '<p class="text-xs text-text-muted truncate">' + escHtml(songNames) + ' · ' + date + ' · <span class="text-accent-green">' + levelLabel + '</span></p>' +
+            '</div>' +
+            '<div class="flex gap-1.5 shrink-0">' +
+            '<button onclick="window.musicDictRepeat(\'' + escHtml(word) + '\')" class="text-xs px-2 py-1.5 rounded-lg bg-accent-green/10 text-accent-green hover:bg-accent-green/20 transition" title="Повторить">🔄</button>' +
+            '<button onclick="speakWord(\'' + escHtml(word) + '\')" class="text-xs px-2 py-1.5 rounded-lg bg-white/5 text-text-secondary hover:bg-white/10 transition" title="Озвучить">🔊</button>' +
+            '<button onclick="window.musicRemoveWordFromDict(\'' + escHtml(word) + '\')" class="text-xs px-2 py-1.5 rounded-lg text-red-400 hover:bg-red-500/10 transition" title="Удалить">🗑</button>' +
+            '</div>' +
+            '</div>';
+        }).join('');
+      };
+
+      window.updateDictStats = function () {
+        const dict = window.musicDictGet();
+        $('dictTotal').textContent = dict.length;
+
+        const now = Date.now();
+        const due = dict.filter(e => (e.nextReview || 0) <= now).length;
+        $('dictDue').textContent = due;
+
+        const learned = dict.filter(e => (e.interval || 0) >= 5).length;
+        $('dictLearned').textContent = learned;
+
+        if (dict.length >= 200) $('dictLevel').textContent = 'C1';
+        else if (dict.length >= 100) $('dictLevel').textContent = 'B2';
+        else $('dictLevel').textContent = 'B1+';
+      };
+
+      window.speakWord = function (word) {
+        if (!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(word);
+        u.lang = 'en-GB';
+        u.rate = 0.85;
+        window.speechSynthesis.speak(u);
+      };
+
+      window.exportDictionary = function () {
+        window.musicDictExport();
+      };
+
+      // =============================================
+      // ПОВТОРЕНИЕ (Anki-style)
+      // =============================================
+      let repeatQueue = [];
+      let repeatCurrent = null;
+      let isFlipped = false;
+
+      window.startRepeatMode = function () {
+        const dict = window.musicDictGet();
+        const now = Date.now();
+        repeatQueue = dict.filter(e => (e.nextReview || 0) <= now);
+
+        if (!repeatQueue.length) {
+          showToast('Нет слов для повторения прямо сейчас');
+          return;
+        }
+
+        // Перемешать
+        for (let i = repeatQueue.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [repeatQueue[i], repeatQueue[j]] = [repeatQueue[j], repeatQueue[i]];
+        }
+
+        switchView('repeat');
+        $('repeatCount').textContent = repeatQueue.length;
+        $('repeatDone').classList.add('hidden');
+        showNextRepeatCard();
+      };
+
+      function showNextRepeatCard() {
+        if (!repeatQueue.length) {
+          $('flashcardArea').classList.add('hidden');
+          $('repeatDone').classList.remove('hidden');
+          return;
+        }
+
+        $('flashcardArea').classList.remove('hidden');
+        repeatCurrent = repeatQueue[0];
+        isFlipped = false;
+
+        $('cardWord').textContent = repeatCurrent.word;
+        $('cardSong').textContent = 'из песни: ' + (repeatCurrent.songTitle || '—');
+        $('cardFront').classList.remove('hidden');
+        $('cardBack').classList.add('hidden');
+        $('repeatCount').textContent = repeatQueue.length;
+      }
+
+      window.flipCard = function () {
+        if (isFlipped) return;
+        isFlipped = true;
+        $('cardFront').classList.add('hidden');
+        $('cardBack').classList.remove('hidden');
+        $('cardTranslation').textContent = '🤖 Нажми "Объяснить" для перевода';
+
+        // Получить перевод через Ollama
+        window.ollamaTranslateLine(repeatCurrent.word).then(trans => {
+          $('cardTranslation').textContent = trans;
+        }).catch(() => {
+          $('cardTranslation').textContent = '(перевод недоступен)';
+        });
+      };
+
+      window.repeatAnswer = function (knew) {
+        const intervals = [3600000, 86400000, 172800000, 518400000, 2592000000]; // 1h, 1d, 2d, 6d, 30d
+
+        if (knew) {
+          repeatCurrent.interval = Math.min((repeatCurrent.interval || 0) + 1, intervals.length);
+          repeatCurrent.nextReview = Date.now() + (intervals[repeatCurrent.interval - 1] || intervals[intervals.length - 1]);
+          showToast('+10 XP 🎉');
+        } else {
+          repeatCurrent.interval = 0;
+          repeatCurrent.nextReview = Date.now() + 3600000; // Через час
+        }
+
+        // Сохранить
+        const dict = window.musicDictGet();
+        const idx = dict.findIndex(e => e.word === repeatCurrent.word && e.songId === repeatCurrent.songId);
+        if (idx >= 0) {
+          dict[idx].interval = repeatCurrent.interval;
+          dict[idx].nextReview = repeatCurrent.nextReview;
+          localStorage.setItem('c1_music_dict', JSON.stringify(dict));
+        }
+
+        repeatQueue.shift();
+        showNextRepeatCard();
+      };
+
+      // =============================================
+      // АЛЬБОМЫ (автоматическая группировка по album тегу)
+      // =============================================
+
+      /** Собрать альбомы из текущих песен */
+      function collectAlbums() {
+        var albums = {};
+        state.songs.forEach(function (song) {
+          var albumName = song.album || 'Без альбома';
+          if (!albums[albumName]) {
+            albums[albumName] = {
+              name: albumName,
+              songs: [],
+              coverUrl: null
+            };
+          }
+          albums[albumName].songs.push(song);
+          // Первая обложка альбома
+          if (!albums[albumName].coverUrl && song.coverUrl) {
+            albums[albumName].coverUrl = song.coverUrl;
+          }
+        });
+        return albums;
+      }
+
+      /** Рендер sidebar с альбомами */
+      function renderSidebarAlbums() {
+        var sidebar = $('sidebarAlbums');
+        if (!sidebar) return;
+        var albums = collectAlbums();
+        var names = Object.keys(albums).sort();
+
+        if (!names.length) {
+          sidebar.innerHTML = '<p class="text-xs text-text-muted py-2">Добавь песни с MP3-тегами</p>';
+          return;
+        }
+
+        sidebar.innerHTML = names.map(function (name) {
+          var count = albums[name].songs.length;
+          return '<button onclick="openAlbum(\'' + escHtml(name).replace(/'/g, "\\'") + '\')" class="w-full text-left text-sm text-text-secondary hover:text-white py-1.5 truncate transition">' +
+            '💿 ' + escHtml(name) + ' <span class="text-text-muted">(' + count + ')</span>' +
+            '</button>';
+        }).join('');
+      }
+
+      /** Открыть альбом — показать песни в библиотеке */
+      window.openAlbum = function (albumName) {
+        switchView('library');
+        // Фильтруем песни по альбому
+        var grid = $('songGrid');
+        var empty = $('emptyLibrary');
+        var albums = collectAlbums();
+        var songs = albums[albumName] ? albums[albumName].songs : [];
+
+        if (!songs.length) {
+          grid.innerHTML = '';
+          empty.classList.remove('hidden');
+          empty.textContent = 'Нет песен в этом альбоме';
+          return;
+        }
+        empty.classList.add('hidden');
+        renderSongGrid(songs);
+      };
+
+      /** Рендер сетки песен */
+      function renderSongGrid(songs) {
+        var grid = $('songGrid');
+        var empty = $('emptyLibrary');
+        if (!songs.length) {
+          grid.innerHTML = '';
+          empty.classList.remove('hidden');
+          return;
+        }
+        empty.classList.add('hidden');
+
+        grid.innerHTML = songs.map(function (song) {
+          var coverHtml = song.coverUrl
+            ? '<img src="' + escHtml(song.coverUrl) + '" alt="" class="w-full aspect-square object-cover rounded-md mb-4" />'
+            : '<div class="w-full aspect-square bg-bg-elevated rounded-md mb-4 flex items-center justify-center"><span class="text-5xl opacity-20">🎵</span></div>';
+          return '<div class="song-card" data-song-id="' + escHtml(song.id) + '">' +
+            '<div class="play-overlay" onclick="event.stopPropagation(); playSongById(\'' + escHtml(song.id) + '\')">▶</div>' +
+            coverHtml +
+            '<p class="text-sm font-semibold text-white truncate">' + escHtml(song.title) + '</p>' +
+            '<p class="text-xs text-text-secondary truncate mt-0.5">' + escHtml(song.artist) + '</p>' +
+            (song.album ? '<p class="text-[10px] text-text-muted truncate mt-0.5">💿 ' + escHtml(song.album) + '</p>' : '') +
+            '<div class="flex items-center gap-2 mt-3">' +
+            '<button onclick="event.stopPropagation(); playSongById(\'' + escHtml(song.id) + '\')" class="text-xs px-3 py-1.5 rounded-full bg-accent-green/15 text-accent-green hover:bg-accent-green/25 transition">▶ Play</button>' +
+            (song.lrc ? '<button onclick="event.stopPropagation(); openKaraoke(\'' + escHtml(song.id) + '\')" class="text-xs px-3 py-1.5 rounded-full bg-white/5 text-text-secondary hover:bg-white/10 transition">📝 Караоке</button>' : '') +
+            '<button onclick="event.stopPropagation(); analyzeSong(\'' + escHtml(song.id) + '\')" class="text-xs px-3 py-1.5 rounded-full bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 transition">🧠 AI</button>' +
+            '<div class="ml-auto relative">' +
+            '<button onclick="event.stopPropagation(); toggleSongMenu(this, \'' + escHtml(song.id) + '\')" class="text-text-muted hover:text-white transition">⋮</button>' +
+            '<div class="song-menu hidden absolute right-0 top-full mt-1 bg-bg-elevated rounded-lg border border-white/5 py-1 w-40 z-10">' +
+            '<button onclick="event.stopPropagation(); deleteSong(\'' + escHtml(song.id) + '\')" class="w-full text-left text-xs px-4 py-2 text-red-400 hover:bg-white/5">🗑 Удалить</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+        }).join('');
+      }
+
+      // =============================================
+      // СЛОВО-POPUP В КАРАОКЕ
+      // =============================================
+      let popupWord = '';
+
+      document.addEventListener('click', function (e) {
+        const wordEl = e.target.closest('.karaoke-word');
+        const popup = $('wordPopup');
+
+        if (wordEl) {
+          e.stopPropagation();
+          popupWord = wordEl.getAttribute('data-word');
+          if (!popupWord) return;
+
+          $('wordPopupWord').textContent = popupWord;
+          $('wordPopupTranscription').textContent = '';
+          $('wordPopupExplainResult').classList.add('hidden');
+
+          // Позиционирование
+          const rect = wordEl.getBoundingClientRect();
+          popup.style.top = (rect.bottom + 8) + 'px';
+          popup.style.left = Math.min(rect.left, window.innerWidth - 360) + 'px';
+          popup.classList.add('show');
+        } else if (!popup.contains(e.target)) {
+          popup.classList.remove('show');
+        }
+      });
+
+      window.wordPopupAddToDict = function () {
+        if (!popupWord) return;
+        const song = state.songs.find(s => s.id === _kSongId);
+        window.musicAddWordToDict(popupWord, _kSongId, song ? song.title : '—');
+        showToast('➕ «' + popupWord + '» в словарь');
+        $('wordPopup').classList.remove('show');
+      };
+
+      window.wordPopupSpeak = function () {
+        if (popupWord) speakWord(popupWord);
+      };
+
+      window.wordPopupExplain = async function () {
+        if (!popupWord) return;
+        const el = $('wordPopupExplainResult');
+        el.classList.remove('hidden');
+        el.textContent = '⏳ Объясняю…';
+        try {
+          const res = await window.ollamaExplainWord(popupWord);
+          el.textContent = res;
+        } catch (e) { el.textContent = 'Ошибка: ' + e.message; }
+      };
+
+      // =============================================
+      // INIT
+      // =============================================
+      async function init() {
+        await renderLibrary();
+        renderDictionary();
+        updateDictStats();
+
+        // Бинд кнопок навигации
+        document.querySelectorAll('.nav-btn').forEach(b => {
+          b.addEventListener('click', () => switchView(b.getAttribute('data-view')));
+        });
+
+        // Бинд словаря
+        if (window.musicDictRender) window.musicDictRender();
+      }
+
+      init();
+    })();
+  </script>
+</body>
+
+</html>
